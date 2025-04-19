@@ -2,8 +2,12 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 import { Button } from "./ui/button";
+import { useState } from "react";
+import AddItemDialog from "./AddItemDialog";
 
 export function AppHeader() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) py-4">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -17,6 +21,7 @@ export function AppHeader() {
           <Button
             title="Quick Create"
             variant="default"
+            onClick={() => setIsDialogOpen(true)}
             className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
           >
             <IconCirclePlusFilled />
@@ -24,6 +29,7 @@ export function AppHeader() {
           </Button>
         </div>
       </div>
+      <AddItemDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </header>
   );
 }

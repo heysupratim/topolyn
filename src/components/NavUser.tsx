@@ -1,5 +1,5 @@
 import {
-  IconCreditCard,
+  IconSettings,
   IconDotsVertical,
   IconLogout,
   IconUserCircle,
@@ -73,7 +73,7 @@ export function NavUser({
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconCreditCard />
+                <IconSettings />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
