@@ -41,10 +41,13 @@ import {
   IconCloud,
   IconCloudComputing,
 } from "@tabler/icons-react";
+import { inventoryApi } from "@/lib/api";
+import { toast } from "sonner";
 
 interface AddItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onItemAdded?: () => void;
 }
 
 // Define item types with their labels and icons
@@ -68,24 +71,53 @@ const itemTypes = [
 export default function AddItemDialog({
   open,
   onOpenChange,
+  onItemAdded,
 }: AddItemDialogProps) {
   const [itemName, setItemName] = useState("");
   const [itemType, setItemType] = useState("");
   const [ipAddress, setIpAddress] = useState("");
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log({ itemName, itemType, ipAddress });
 
-    // Reset form and close dialog
-    setItemName("");
-    setItemType("");
-    setIpAddress("");
-    onOpenChange(false);
+    if (!itemName || !itemType) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Save the inventory item using the API client instead of direct Prisma access
+      await inventoryApi.createItem({
+        name: itemName,
+        type: itemType,
+        ipAddress: ipAddress || undefined,
+      });
+
+      // Show success message
+      toast.success("Item added successfully");
+
+      // Reset form and close dialog
+      setItemName("");
+      setItemType("");
+      setIpAddress("");
+      onOpenChange(false);
+
+      // Notify parent component that an item was added
+      if (onItemAdded) {
+        onItemAdded();
+      }
+    } catch (error) {
+      console.error("Failed to add item:", error);
+      toast.error("Failed to add item. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Custom icon style for line style
@@ -231,10 +263,13 @@ export default function AddItemDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit">Add</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Adding..." : "Add"}
+              </Button>
             </DialogFooter>
           </form>
         </div>
