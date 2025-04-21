@@ -1,4 +1,4 @@
-import { type Icon } from "@tabler/icons-react";
+import { LucideIcon } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -14,7 +14,7 @@ export function NavMain({
   items: {
     title: string;
     url: string;
-    icon?: Icon;
+    icon: LucideIcon;
   }[];
 }) {
   return (
@@ -24,7 +24,7 @@ export function NavMain({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon />}
+                <item.icon />
                 <span>{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

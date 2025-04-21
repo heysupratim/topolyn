@@ -27,20 +27,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { 
+  Check, 
+  ChevronsUpDown, 
+  Router, 
+  Shield, 
+  Network, 
+  Wifi, 
+  Cpu, 
+  Laptop, 
+  Server, 
+  ServerCrash, 
+  Cloud, 
+  CloudCog 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  IconRouter,
-  IconShield,
-  IconNetwork,
-  IconWifi,
-  IconCpu,
-  IconDeviceLaptop,
-  IconServer,
-  IconServerBolt,
-  IconCloud,
-  IconCloudComputing,
-} from "@tabler/icons-react";
 import { inventoryApi } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -52,20 +53,20 @@ interface AddItemDialogProps {
 
 // Define item types with their labels and icons
 const itemTypes = [
-  { value: "router", label: "Router", icon: IconRouter },
-  { value: "firewall", label: "Firewall", icon: IconShield },
-  { value: "switch", label: "Switch", icon: IconNetwork },
-  { value: "access-point", label: "Access Point", icon: IconWifi },
+  { value: "router", label: "Router", icon: Router },
+  { value: "firewall", label: "Firewall", icon: Shield },
+  { value: "switch", label: "Switch", icon: Network },
+  { value: "access-point", label: "Access Point", icon: Wifi },
   {
     value: "single-board-computer",
     label: "Single Board Computer",
-    icon: IconCpu,
+    icon: Cpu,
   },
-  { value: "mini-pc", label: "Mini PC", icon: IconDeviceLaptop },
-  { value: "tower-server", label: "Tower Server", icon: IconServer },
-  { value: "rack-server", label: "Rack Server", icon: IconServerBolt },
-  { value: "vps", label: "VPS", icon: IconCloud },
-  { value: "cloud-compute", label: "Cloud Compute", icon: IconCloudComputing },
+  { value: "mini-pc", label: "Mini PC", icon: Laptop },
+  { value: "tower-server", label: "Tower Server", icon: Server },
+  { value: "rack-server", label: "Rack Server", icon: ServerCrash },
+  { value: "vps", label: "VPS", icon: Cloud },
+  { value: "cloud-compute", label: "Cloud Compute", icon: CloudCog },
 ];
 
 export default function AddItemDialog({
@@ -122,7 +123,6 @@ export default function AddItemDialog({
   // Custom icon style for line style
   const iconStyle = {
     className: "h-4 w-4 text-foreground",
-    stroke: 2,
   };
 
   // Filter item types based on search query
@@ -181,7 +181,6 @@ export default function AddItemDialog({
                             {selectedType.icon && (
                               <selectedType.icon
                                 className="h-4 w-4 text-foreground mr-2"
-                                stroke={2}
                               />
                             )}
                             {selectedType.label}

@@ -1,9 +1,5 @@
 import * as React from "react";
-import {
-  IconInnerShadowTop,
-  IconListDetails,
-  IconSitemap,
-} from "@tabler/icons-react";
+import { Box, ListTree, Map } from "lucide-react";
 
 import { NavMain } from "@/components/NavMain";
 import { NavSecondary } from "@/components/NavSecondary";
@@ -28,12 +24,12 @@ const data = {
     {
       title: "Inventory",
       url: "#",
-      icon: IconListDetails,
+      icon: ListTree,
     },
     {
       title: "Map",
       url: "#",
-      icon: IconSitemap,
+      icon: Map,
     },
   ],
   navSecondary: [],
@@ -50,7 +46,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
+                <Box className="!size-5" />
                 <span className="text-base font-semibold">Topolyn</span>
               </a>
             </SidebarMenuButton>
