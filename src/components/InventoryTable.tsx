@@ -45,7 +45,7 @@ export function InventoryTable() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <Input
-          placeholder="Filter by name..."
+          placeholder="Search by name..."
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}
           className="max-w-xs bg-card"

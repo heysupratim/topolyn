@@ -29,9 +29,9 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
     const itemType = itemTypes.find((t) => t.value === type);
     if (itemType && itemType.icon) {
       const Icon = itemType.icon;
-      return <Icon className="h-6 w-6" />;
+      return <Icon className="h-4 w-4" />;
     }
-    return <Server className="h-6 w-6" />; // Default icon
+    return <Server className="h-4 w-4" />; // Default icon
   };
 
   const openDeleteDialog = () => {
