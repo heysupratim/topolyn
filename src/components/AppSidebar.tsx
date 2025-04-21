@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, ListTree, Map } from "lucide-react";
+import { Box, LayoutList, Workflow } from "lucide-react";
 
 import { NavMain } from "@/components/NavMain";
 import { NavSecondary } from "@/components/NavSecondary";
@@ -24,12 +24,12 @@ const data = {
     {
       title: "Inventory",
       url: "#",
-      icon: ListTree,
+      icon: LayoutList,
     },
     {
       title: "Map",
       url: "#",
-      icon: Map,
+      icon: Workflow,
     },
   ],
   navSecondary: [],
