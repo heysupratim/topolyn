@@ -76,8 +76,8 @@ export function EditItemDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="bg-card max-w-md py-8">
-        <div className="mx-auto w-full max-w-sm">
+      <DrawerContent className="bg-card flex h-full max-w-md flex-col py-8">
+        <div className="mx-auto w-full max-w-sm flex-1 overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>Edit Item Details</DrawerTitle>
             <DrawerDescription>
@@ -85,7 +85,7 @@ export function EditItemDrawer({
             </DrawerDescription>
           </DrawerHeader>
           <div className="p-4 pb-0">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -142,15 +142,15 @@ export function EditItemDrawer({
               </div>
             </div>
           </div>
-          <DrawerFooter className="pt-2">
-            <Button onClick={handleSave} disabled={isUpdating}>
-              {isUpdating ? "Saving..." : "Save changes"}
-            </Button>
-            <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DrawerClose>
-          </DrawerFooter>
         </div>
+        <DrawerFooter className="bg-card sticky bottom-0 mt-auto border-t">
+          <Button onClick={handleSave} disabled={isUpdating}>
+            {isUpdating ? "Saving..." : "Save changes"}
+          </Button>
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
