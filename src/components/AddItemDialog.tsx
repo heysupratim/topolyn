@@ -123,7 +123,7 @@ export default function AddItemDialog({
 
   // Filter item types based on search query
   const filteredItemTypes = itemTypes.filter((type) =>
-    type.label.toLowerCase().includes(searchQuery.toLowerCase())
+    type.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Get the selected item type object
@@ -131,7 +131,7 @@ export default function AddItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] rounded-xl border bg-card text-card-foreground shadow p-0 overflow-hidden">
+      <DialogContent className="bg-card text-card-foreground overflow-hidden rounded-xl border p-0 shadow sm:max-w-[425px]">
         <DialogHeader className="bg-background px-6 pt-10 pb-6">
           <DialogTitle>Add Item</DialogTitle>
           <DialogDescription>
@@ -158,12 +158,12 @@ export default function AddItemDialog({
                     }}
                     className={cn(
                       errors.itemName &&
-                        "border-destructive focus-visible:ring-destructive"
+                        "border-destructive focus-visible:ring-destructive",
                     )}
                     required
                   />
                   {errors.itemName && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-destructive text-sm">
                       {errors.itemName}
                     </p>
                   )}
@@ -186,9 +186,9 @@ export default function AddItemDialog({
                         role="combobox"
                         aria-expanded={openCombobox}
                         className={cn(
-                          "w-full justify-between bg-card",
+                          "bg-card w-full justify-between",
                           errors.itemType &&
-                            "border-destructive focus-visible:ring-destructive text-destructive"
+                            "border-destructive focus-visible:ring-destructive text-destructive",
                         )}
                         onClick={() => {
                           if (errors.itemType) {
@@ -199,7 +199,7 @@ export default function AddItemDialog({
                         {selectedType ? (
                           <div className="flex items-center">
                             {selectedType.icon && (
-                              <selectedType.icon className="h-4 w-4 text-foreground mr-2" />
+                              <selectedType.icon className="text-foreground mr-2 h-4 w-4" />
                             )}
                             {selectedType.label}
                           </div>
@@ -227,7 +227,7 @@ export default function AddItemDialog({
                           value={searchQuery}
                           onValueChange={setSearchQuery}
                         />
-                        <CommandList className="max-h-[200px] w-full scroll-auto overflow-y-auto">
+                        <CommandList className="max-h-[200px] w-full overflow-y-auto scroll-auto">
                           <CommandEmpty>No item type found.</CommandEmpty>
                           <CommandGroup>
                             {filteredItemTypes.map((type) => (
@@ -254,7 +254,7 @@ export default function AddItemDialog({
                                     "ml-auto h-4 w-4",
                                     itemType === type.value
                                       ? "opacity-100"
-                                      : "opacity-0"
+                                      : "opacity-0",
                                   )}
                                 />
                               </CommandItem>
@@ -265,7 +265,7 @@ export default function AddItemDialog({
                     </PopoverContent>
                   </Popover>
                   {errors.itemType && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-destructive text-sm">
                       {errors.itemType}
                     </p>
                   )}
@@ -287,12 +287,12 @@ export default function AddItemDialog({
                     }}
                     className={cn(
                       errors.ipAddress &&
-                        "border-destructive focus-visible:ring-destructive"
+                        "border-destructive focus-visible:ring-destructive",
                     )}
                     required
                   />
                   {errors.ipAddress && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-destructive text-sm">
                       {errors.ipAddress}
                     </p>
                   )}

@@ -28,7 +28,7 @@ interface InventoryContextType {
 
 // Create the context with a default value
 const InventoryContext = createContext<InventoryContextType | undefined>(
-  undefined
+  undefined,
 );
 
 // Props for the context provider
@@ -54,7 +54,7 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
       setError(
         err instanceof Error
           ? err
-          : new Error("Failed to fetch inventory items")
+          : new Error("Failed to fetch inventory items"),
       );
     } finally {
       setIsLoading(false);
@@ -74,7 +74,7 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
       setError(
         err instanceof Error
           ? err
-          : new Error("Failed to delete inventory item")
+          : new Error("Failed to delete inventory item"),
       );
     } finally {
       setIsLoading(false);

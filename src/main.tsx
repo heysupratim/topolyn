@@ -13,7 +13,7 @@ const initApp = async () => {
   } catch (error) {
     console.warn(
       "Initial database check failed, app will still attempt to start:",
-      error
+      error,
     );
     // We don't prevent app launch, as the backend might be setting up the database
   } finally {
@@ -21,7 +21,7 @@ const initApp = async () => {
     createRoot(document.getElementById("root")!).render(
       <StrictMode>
         <App />
-      </StrictMode>
+      </StrictMode>,
     );
   }
 };

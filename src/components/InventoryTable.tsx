@@ -32,7 +32,7 @@ export function InventoryTable() {
     setTypeFilters((current) =>
       current.includes(value)
         ? current.filter((type) => type !== value)
-        : [...current, value]
+        : [...current, value],
     );
   };
 
@@ -43,14 +43,14 @@ export function InventoryTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <Input
           placeholder="Search by name..."
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}
-          className="max-w-xs bg-card"
+          className="bg-card max-w-xs"
         />
-        <div className="w-full sm:w-auto flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           {typeFilters.length > 0 && (
             <Button
               variant="ghost"
@@ -58,7 +58,7 @@ export function InventoryTable() {
               onClick={clearTypeFilters}
               className="flex items-center"
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="mr-1 h-4 w-4" />
               Clear filters
             </Button>
           )}
@@ -87,9 +87,9 @@ export function InventoryTable() {
                     key={type.value}
                     checked={typeFilters.includes(type.value)}
                     onCheckedChange={() => toggleTypeFilter(type.value)}
-                    className="flex items-center justify-between pr-8 pl-2 relative"
+                    className="relative flex items-center justify-between pr-8 pl-2"
                   >
-                    <div className="flex gap-3 items-center">
+                    <div className="flex items-center gap-3">
                       <Icon className="h-4 w-4" />
                       {type.label}
                     </div>
@@ -107,7 +107,7 @@ export function InventoryTable() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8">Loading...</div>
+        <div className="py-8 text-center">Loading...</div>
       ) : filteredItems.length > 0 ? (
         <div className="flex flex-wrap gap-4">
           {filteredItems.map((item) => (
@@ -115,7 +115,7 @@ export function InventoryTable() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 border rounded-md bg-card">
+        <div className="bg-card rounded-md border py-8 text-center">
           No inventory items found.
         </div>
       )}

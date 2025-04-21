@@ -52,22 +52,22 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-md transition-shadow p-0 min-w-xs">
+      <Card className="min-w-xs overflow-hidden p-0 transition-shadow hover:shadow-md">
         <CardContent className="px-4 py-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h3 className="font-semibold text-lg truncate">{item.name}</h3>
-              <div className="flex items-center text-sm text-muted-foreground mt-1">
+              <h3 className="truncate text-lg font-semibold">{item.name}</h3>
+              <div className="text-muted-foreground mt-1 flex items-center text-sm">
                 <span>{item.type}</span>
               </div>
               <div className="mt-2 text-sm">
                 <div>{item.ipAddress || "No IP address"}</div>
-                <div className="text-xs text-muted-foreground mt-2">
+                <div className="text-muted-foreground mt-2 text-xs">
                   Added: {format(new Date(item.createdAt), "PPP")}
                 </div>
               </div>
             </div>
-            <div className="ml-4 p-2 bg-muted rounded-md">
+            <div className="bg-muted ml-4 rounded-md p-2">
               {getIconForType(item.type)}
             </div>
           </div>
