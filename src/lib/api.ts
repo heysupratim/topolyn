@@ -1,8 +1,7 @@
 import axios from "axios";
 
 // Define the base API URL - this should point to your backend API
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Create an API client
 export const apiClient = axios.create({
@@ -14,6 +13,17 @@ export const apiClient = axios.create({
 
 // API endpoints for inventory management
 export const inventoryApi = {
+  // Check database connection and ensure it exists
+  ensureDatabase: async () => {
+    try {
+      const response = await apiClient.get("/health");
+      return response.data;
+    } catch (error) {
+      console.error("Failed to check database status:", error);
+      throw error;
+    }
+  },
+
   // Get all inventory items
   getAllItems: async () => {
     const response = await apiClient.get("/inventory");

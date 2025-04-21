@@ -4,9 +4,16 @@ import { IconCirclePlusFilled } from "@tabler/icons-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import AddItemDialog from "./AddItemDialog";
+import { useInventory } from "@/context/InventoryContext";
 
 export function AppHeader() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { refreshInventory } = useInventory();
+
+  const handleItemAdded = () => {
+    // Use the context's refresh function instead of dispatching an event
+    refreshInventory();
+  };
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) py-4">
@@ -29,7 +36,11 @@ export function AppHeader() {
           </Button>
         </div>
       </div>
-      <AddItemDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
+      <AddItemDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onItemAdded={handleItemAdded}
+      />
     </header>
   );
 }

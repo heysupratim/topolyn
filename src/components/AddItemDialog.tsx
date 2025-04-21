@@ -92,7 +92,6 @@ export default function AddItemDialog({
     setIsSubmitting(true);
 
     try {
-      // Save the inventory item using the API client instead of direct Prisma access
       await inventoryApi.createItem({
         name: itemName,
         type: itemType,

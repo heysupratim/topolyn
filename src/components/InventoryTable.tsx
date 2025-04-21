@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -18,52 +17,18 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
+import { useState } from "react";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { inventoryApi } from "@/lib/api";
 import { format } from "date-fns";
-
-type InventoryItem = {
-  id: string;
-  name: string;
-  type: string;
-  ipAddress: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import { useInventory, InventoryItem } from "@/context/InventoryContext";
 
 export function InventoryTable() {
-  const [items, setItems] = useState<InventoryItem[]>([]);
+  const { items, isLoading } = useInventory();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Function to fetch inventory items
-  const fetchInventoryItems = async () => {
-    try {
-      setIsLoading(true);
-      const data = await inventoryApi.getAllItems();
-      setItems(data);
-    } catch (error) {
-      console.error("Failed to fetch inventory items:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Initial data fetch
-  useEffect(() => {
-    fetchInventoryItems();
-
-    // Set up polling for real-time updates (every 5 seconds)
-    const interval = setInterval(() => {
-      fetchInventoryItems();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const columns: ColumnDef<InventoryItem>[] = [
     {
