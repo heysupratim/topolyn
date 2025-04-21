@@ -27,19 +27,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { 
-  Check, 
-  ChevronsUpDown, 
-  Router, 
-  Shield, 
-  Network, 
-  Wifi, 
-  Cpu, 
-  Laptop, 
-  Server, 
-  ServerCrash, 
-  Cloud, 
-  CloudCog 
+import {
+  Check,
+  ChevronsUpDown,
+  Router,
+  Shield,
+  Network,
+  Wifi,
+  Cpu,
+  Laptop,
+  Server,
+  ServerCrash,
+  Cloud,
+  CloudCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inventoryApi } from "@/lib/api";
@@ -53,20 +53,20 @@ interface AddItemDialogProps {
 
 // Define item types with their labels and icons
 const itemTypes = [
-  { value: "router", label: "Router", icon: Router },
-  { value: "firewall", label: "Firewall", icon: Shield },
-  { value: "switch", label: "Switch", icon: Network },
-  { value: "access-point", label: "Access Point", icon: Wifi },
+  { value: "Router", label: "Router", icon: Router },
+  { value: "Firewall", label: "Firewall", icon: Shield },
+  { value: "Switch", label: "Switch", icon: Network },
+  { value: "Access Point", label: "Access Point", icon: Wifi },
   {
-    value: "single-board-computer",
+    value: "Single Board Computer",
     label: "Single Board Computer",
     icon: Cpu,
   },
-  { value: "mini-pc", label: "Mini PC", icon: Laptop },
-  { value: "tower-server", label: "Tower Server", icon: Server },
-  { value: "rack-server", label: "Rack Server", icon: ServerCrash },
-  { value: "vps", label: "VPS", icon: Cloud },
-  { value: "cloud-compute", label: "Cloud Compute", icon: CloudCog },
+  { value: "Mini PC", label: "Mini PC", icon: Laptop },
+  { value: "Tower Server", label: "Tower Server", icon: Server },
+  { value: "Rack Server", label: "Rack Server", icon: ServerCrash },
+  { value: "VPS", label: "VPS", icon: Cloud },
+  { value: "Cloud Compute", label: "Cloud Compute", icon: CloudCog },
 ];
 
 export default function AddItemDialog({
@@ -179,9 +179,7 @@ export default function AddItemDialog({
                         {selectedType ? (
                           <div className="flex items-center">
                             {selectedType.icon && (
-                              <selectedType.icon
-                                className="h-4 w-4 text-foreground mr-2"
-                              />
+                              <selectedType.icon className="h-4 w-4 text-foreground mr-2" />
                             )}
                             {selectedType.label}
                           </div>
