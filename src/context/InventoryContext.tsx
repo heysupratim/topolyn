@@ -5,7 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { inventoryApi } from "@/lib/api";
+import { inventoryApi } from "@/lib/Api";
 
 // Define the shape of an inventory item
 export type InventoryItem = {

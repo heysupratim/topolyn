@@ -28,10 +28,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { inventoryApi } from "@/lib/api";
+import { cn } from "@/lib/Utils";
+import { inventoryApi } from "@/lib/Api";
 import { toast } from "sonner";
-import { itemTypes } from "@/lib/item-types";
+import { itemTypes } from "@/lib/ItemTypes";
 
 interface AddItemDialogProps {
   open: boolean;

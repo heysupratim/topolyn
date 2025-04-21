@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
-import { inventoryApi } from "./lib/api";
+import { inventoryApi } from "./lib/Api.ts";
 
 // Check for database connection before rendering
 const initApp = async () => {

@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Server } from "lucide-react";
-import { itemTypes } from "@/lib/item-types";
+import { itemTypes } from "@/lib/ItemTypes";
 import type { InventoryItem } from "@/context/InventoryContext";
 
 interface InventoryItemCardProps {

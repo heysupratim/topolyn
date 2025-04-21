@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Filter, X, CheckIcon } from "lucide-react";
-import { itemTypes } from "@/lib/item-types";
+import { itemTypes } from "@/lib/ItemTypes";
 import { InventoryItemCard } from "@/components/InventoryItemCard";
 
 export function InventoryTable() {
