@@ -76,7 +76,7 @@ export function EditItemDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="max-w-md">
+      <DrawerContent className="bg-card max-w-md py-8">
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
             <DrawerTitle>Edit Item Details</DrawerTitle>
@@ -138,9 +138,6 @@ export function EditItemDrawer({
 
                   <div className="font-medium">Updated</div>
                   <div>{format(new Date(item.updatedAt), "PPP")}</div>
-
-                  <div className="font-medium">ID</div>
-                  <div className="truncate">{item.id}</div>
                 </div>
               </div>
             </div>
