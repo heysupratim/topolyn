@@ -23,6 +23,7 @@ interface InventoryContextType {
   isLoading: boolean;
   error: Error | null;
   refreshInventory: () => Promise<void>;
+  deleteItem: (id: string) => Promise<void>;
 }
 
 // Create the context with a default value
@@ -60,6 +61,26 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     }
   };
 
+  // Function to delete an inventory item
+  const deleteItem = async (id: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await inventoryApi.deleteItem(id);
+      // Refresh the inventory after deletion
+      await refreshInventory();
+    } catch (err) {
+      console.error("Failed to delete inventory item:", err);
+      setError(
+        err instanceof Error
+          ? err
+          : new Error("Failed to delete inventory item")
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Initial data fetch
   useEffect(() => {
     refreshInventory();
@@ -71,6 +92,7 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     isLoading,
     error,
     refreshInventory,
+    deleteItem,
   };
 
   return (

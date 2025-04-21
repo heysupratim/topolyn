@@ -48,7 +48,7 @@ export function InventoryTable() {
           placeholder="Filter by name..."
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}
-          className="max-w-sm bg-card"
+          className="max-w-xs bg-card"
         />
         <div className="w-full sm:w-auto flex items-center gap-2">
           {typeFilters.length > 0 && (
@@ -109,7 +109,7 @@ export function InventoryTable() {
       {isLoading ? (
         <div className="text-center py-8">Loading...</div>
       ) : filteredItems.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="flex flex-wrap gap-4">
           {filteredItems.map((item) => (
             <InventoryItemCard key={item.id} item={item} />
           ))}
