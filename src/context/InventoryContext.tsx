@@ -24,6 +24,7 @@ interface InventoryContextType {
   error: Error | null;
   refreshInventory: () => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
+  updateItem: (item: InventoryItem) => Promise<void>;
 }
 
 // Create the context with a default value
@@ -81,6 +82,27 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     }
   };
 
+  // Function to update an inventory item
+  const updateItem = async (item: InventoryItem) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await inventoryApi.updateItem(item.id, item);
+      // Refresh the inventory after update
+      await refreshInventory();
+    } catch (err) {
+      console.error("Failed to update inventory item:", err);
+      setError(
+        err instanceof Error
+          ? err
+          : new Error("Failed to update inventory item"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Initial data fetch
   useEffect(() => {
     refreshInventory();
@@ -93,6 +115,7 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     error,
     refreshInventory,
     deleteItem,
+    updateItem,
   };
 
   return (

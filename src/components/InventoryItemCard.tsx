@@ -14,15 +14,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 
 interface InventoryItemCardProps {
   item: InventoryItem;
 }
 
 export function InventoryItemCard({ item }: InventoryItemCardProps) {
-  const { deleteItem } = useInventory();
+  const { deleteItem, updateItem } = useInventory();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [formData, setFormData] = useState<InventoryItem>({ ...item });
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Get icon component for a given type
   const getIconForType = (type: string) => {
@@ -34,8 +57,37 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
     return <Server className="h-4 w-4" />; // Default icon
   };
 
-  const openDeleteDialog = () => {
+  const handleCardClick = () => {
+    setIsDrawerOpen(true);
+    setFormData({ ...item });
+  };
+
+  const openDeleteDialog = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
     setIsDialogOpen(true);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTypeChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, type: value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsUpdating(true);
+      await updateItem(formData);
+      setIsDrawerOpen(false);
+      toast.success("Item updated successfully");
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      toast.error("Failed to update item");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -44,6 +96,7 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
       await deleteItem(item.id);
     } catch (error) {
       console.error("Failed to delete item:", error);
+      toast.error("Failed to delete item");
     } finally {
       setIsDeleting(false);
       setIsDialogOpen(false);
@@ -52,7 +105,10 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
 
   return (
     <>
-      <Card className="min-w-xs overflow-hidden p-0 transition-shadow hover:shadow-md">
+      <Card
+        className="min-w-xs cursor-pointer overflow-hidden p-0 transition-shadow hover:shadow-md"
+        onClick={handleCardClick}
+      >
         <CardContent className="px-4 py-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -108,6 +164,95 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Drawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+        direction="right"
+      >
+        <DrawerContent className="max-w-md">
+          <div className="mx-auto w-full max-w-sm">
+            <DrawerHeader>
+              <DrawerTitle>Edit Item Details</DrawerTitle>
+              <DrawerDescription>
+                Make changes to the inventory item and save when done.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 pb-0">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label>
+                  <Select
+                    value={formData.type}
+                    onValueChange={handleTypeChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {itemTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div className="flex items-center gap-2">
+                            {getIconForType(type.value)}
+                            <span>{type.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ipAddress">IP Address</Label>
+                  <Input
+                    id="ipAddress"
+                    name="ipAddress"
+                    value={formData.ipAddress || ""}
+                    onChange={handleChange}
+                    placeholder="IP Address"
+                  />
+                </div>
+
+                <div className="mt-4 space-y-1">
+                  <h4 className="text-muted-foreground text-sm font-medium">
+                    Item Information
+                  </h4>
+                  <Separator />
+
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="font-medium">Created</div>
+                    <div>{format(new Date(item.createdAt), "PPP")}</div>
+
+                    <div className="font-medium">Updated</div>
+                    <div>{format(new Date(item.updatedAt), "PPP")}</div>
+
+                    <div className="font-medium">ID</div>
+                    <div className="truncate">{item.id}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DrawerFooter className="pt-2">
+              <Button onClick={handleSave} disabled={isUpdating}>
+                {isUpdating ? "Saving..." : "Save changes"}
+              </Button>
+              <DrawerClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }
