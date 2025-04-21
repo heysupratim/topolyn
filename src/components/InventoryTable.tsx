@@ -4,7 +4,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import { format } from "date-fns";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Router,
   Shield,
@@ -16,6 +21,9 @@ import {
   ServerCrash,
   Cloud,
   CloudCog,
+  Filter,
+  X,
+  CheckIcon,
 } from "lucide-react";
 
 // Define item types with their labels and icons (same as AddItemDialog)
@@ -39,7 +47,7 @@ const itemTypes = [
 export function InventoryTable() {
   const { items, isLoading } = useInventory();
   const [nameFilter, setNameFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [typeFilters, setTypeFilters] = useState<string[]>([]);
 
   // Get icon component for a given type
   const getIconForType = (type: string) => {
@@ -56,9 +64,24 @@ export function InventoryTable() {
     const matchesName = item.name
       .toLowerCase()
       .includes(nameFilter.toLowerCase());
-    const matchesType = typeFilter ? item.type === typeFilter : true;
+    const matchesType =
+      typeFilters.length === 0 || typeFilters.includes(item.type);
     return matchesName && matchesType;
   });
+
+  // Handle checkbox toggle
+  const toggleTypeFilter = (value: string) => {
+    setTypeFilters((current) =>
+      current.includes(value)
+        ? current.filter((type) => type !== value)
+        : [...current, value]
+    );
+  };
+
+  // Clear all type filters
+  const clearTypeFilters = () => {
+    setTypeFilters([]);
+  };
 
   return (
     <div className="space-y-4">
@@ -69,36 +92,59 @@ export function InventoryTable() {
           onChange={(e) => setNameFilter(e.target.value)}
           className="max-w-sm bg-card"
         />
-        <div className="w-full sm:w-auto">
-          <ToggleGroup
-            type="single"
-            value={typeFilter || ""}
-            onValueChange={(value) => setTypeFilter(value || null)}
-          >
-            {typeFilter && (
+        <div className="w-full sm:w-auto flex items-center gap-2">
+          {typeFilters.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearTypeFilters}
+              className="flex items-center"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Clear filters
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                size="sm"
-                onClick={() => setTypeFilter(null)}
-                className="mr-2"
+                className="bg-card flex items-center gap-2"
               >
-                Clear filter
+                <Filter className="h-4 w-4" />
+                {typeFilters.length === 0 ? (
+                  "Filter by type"
+                ) : (
+                  <>
+                    {typeFilters.length} type{typeFilters.length > 1 ? "s" : ""}{" "}
+                    selected
+                  </>
+                )}
               </Button>
-            )}
-            {itemTypes.map((type) => {
-              const Icon = type.icon;
-              return (
-                <ToggleGroupItem
-                  key={type.value}
-                  value={type.value}
-                  aria-label={`Filter by ${type.label}`}
-                  title={type.label}
-                >
-                  <Icon className="h-4 w-4" />
-                </ToggleGroupItem>
-              );
-            })}
-          </ToggleGroup>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="">
+              {itemTypes.map((type) => {
+                const Icon = type.icon;
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={type.value}
+                    checked={typeFilters.includes(type.value)}
+                    onCheckedChange={() => toggleTypeFilter(type.value)}
+                    className="flex items-center justify-between pr-8 pl-2 relative"
+                  >
+                    <div className="flex gap-3 items-center">
+                      <Icon className="h-4 w-4" />
+                      {type.label}
+                    </div>
+                    {typeFilters.includes(type.value) && (
+                      <span className="absolute right-2 flex items-center justify-center">
+                        <CheckIcon className="h-4 w-4" />
+                      </span>
+                    )}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
