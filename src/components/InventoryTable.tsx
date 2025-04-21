@@ -10,39 +10,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Router,
-  Shield,
-  Network,
-  Wifi,
-  Cpu,
-  Laptop,
-  Server,
-  ServerCrash,
-  Cloud,
-  CloudCog,
-  Filter,
-  X,
-  CheckIcon,
-} from "lucide-react";
-
-// Define item types with their labels and icons (same as AddItemDialog)
-const itemTypes = [
-  { value: "Router", label: "Router", icon: Router },
-  { value: "Firewall", label: "Firewall", icon: Shield },
-  { value: "Switch", label: "Switch", icon: Network },
-  { value: "Access Point", label: "Access Point", icon: Wifi },
-  {
-    value: "Single Board Computer",
-    label: "Single Board Computer",
-    icon: Cpu,
-  },
-  { value: "Mini PC", label: "Mini PC", icon: Laptop },
-  { value: "Tower Server", label: "Tower Server", icon: Server },
-  { value: "Rack Server", label: "Rack Server", icon: ServerCrash },
-  { value: "VPS", label: "VPS", icon: Cloud },
-  { value: "Cloud Compute", label: "Cloud Compute", icon: CloudCog },
-];
+import { Filter, X, CheckIcon, Server } from "lucide-react";
+import { itemTypes } from "@/lib/item-types";
 
 export function InventoryTable() {
   const { items, isLoading } = useInventory();
