@@ -1,220 +1,145 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  SortingState,
-  getSortedRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-  getPaginationRowModel,
-} from "@tanstack/react-table";
-import { useState } from "react";
-import { ArrowUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useInventory } from "@/context/InventoryContext";
 import { format } from "date-fns";
-import { useInventory, InventoryItem } from "@/context/InventoryContext";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Router,
+  Shield,
+  Network,
+  Wifi,
+  Cpu,
+  Laptop,
+  Server,
+  ServerCrash,
+  Cloud,
+  CloudCog,
+} from "lucide-react";
+
+// Define item types with their labels and icons (same as AddItemDialog)
+const itemTypes = [
+  { value: "Router", label: "Router", icon: Router },
+  { value: "Firewall", label: "Firewall", icon: Shield },
+  { value: "Switch", label: "Switch", icon: Network },
+  { value: "Access Point", label: "Access Point", icon: Wifi },
+  {
+    value: "Single Board Computer",
+    label: "Single Board Computer",
+    icon: Cpu,
+  },
+  { value: "Mini PC", label: "Mini PC", icon: Laptop },
+  { value: "Tower Server", label: "Tower Server", icon: Server },
+  { value: "Rack Server", label: "Rack Server", icon: ServerCrash },
+  { value: "VPS", label: "VPS", icon: Cloud },
+  { value: "Cloud Compute", label: "Cloud Compute", icon: CloudCog },
+];
 
 export function InventoryTable() {
   const { items, isLoading } = useInventory();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [nameFilter, setNameFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
-  const columns: ColumnDef<InventoryItem>[] = [
-    {
-      accessorKey: "name",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="font-medium">{row.getValue("name")}</div>
-      ),
-    },
-    {
-      accessorKey: "type",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Type
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => <div>{row.getValue("type")}</div>,
-    },
-    {
-      accessorKey: "ipAddress",
-      header: "IP Address",
-      cell: ({ row }) => <div>{row.getValue("ipAddress") || "N/A"}</div>,
-    },
-    {
-      accessorKey: "createdAt",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Created At
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const date = row.getValue("createdAt") as Date;
-        return <div>{format(new Date(date), "PPP")}</div>;
-      },
-    },
-    {
-      accessorKey: "updatedAt",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Updated At
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const date = row.getValue("updatedAt") as Date;
-        return <div>{format(new Date(date), "PPP")}</div>;
-      },
-    },
-  ];
+  // Get icon component for a given type
+  const getIconForType = (type: string) => {
+    const itemType = itemTypes.find((t) => t.value === type);
+    if (itemType && itemType.icon) {
+      const Icon = itemType.icon;
+      return <Icon className="h-6 w-6" />;
+    }
+    return <Server className="h-6 w-6" />; // Default icon
+  };
 
-  const table = useReactTable({
-    data: items,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    state: {
-      sorting,
-      columnFilters,
-    },
+  // Filter items by name and type
+  const filteredItems = items.filter((item) => {
+    const matchesName = item.name
+      .toLowerCase()
+      .includes(nameFilter.toLowerCase());
+    const matchesType = typeFilter ? item.type === typeFilter : true;
+    return matchesName && matchesType;
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Inventory Items</CardTitle>
-        <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter by name..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No inventory items found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <Input
+          placeholder="Filter by name..."
+          value={nameFilter}
+          onChange={(e) => setNameFilter(e.target.value)}
+          className="max-w-sm bg-card"
+        />
+        <div className="w-full sm:w-auto">
+          <ToggleGroup
+            type="single"
+            value={typeFilter || ""}
+            onValueChange={(value) => setTypeFilter(value || null)}
           >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+            {typeFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTypeFilter(null)}
+                className="mr-2"
+              >
+                Clear filter
+              </Button>
+            )}
+            {itemTypes.map((type) => {
+              const Icon = type.icon;
+              return (
+                <ToggleGroupItem
+                  key={type.value}
+                  value={type.value}
+                  aria-label={`Filter by ${type.label}`}
+                  title={type.label}
+                >
+                  <Icon className="h-4 w-4" />
+                </ToggleGroupItem>
+              );
+            })}
+          </ToggleGroup>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-8">Loading...</div>
+      ) : filteredItems.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredItems.map((item) => (
+            <Card
+              key={item.id}
+              className="overflow-hidden hover:shadow-md transition-shadow"
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg truncate">
+                      {item.name}
+                    </h3>
+                    <div className="flex items-center text-sm text-muted-foreground mt-1">
+                      <span>{item.type}</span>
+                    </div>
+                    <div className="mt-2 text-sm">
+                      <div>{item.ipAddress || "No IP address"}</div>
+                      <div className="text-xs text-muted-foreground mt-2">
+                        Added: {format(new Date(item.createdAt), "PPP")}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ml-4 p-2 bg-muted rounded-md">
+                    {getIconForType(item.type)}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 border rounded-md bg-card">
+          No inventory items found.
+        </div>
+      )}
+    </div>
   );
 }
