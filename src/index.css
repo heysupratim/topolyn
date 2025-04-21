@@ -197,4 +197,41 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+
+  /* Add cursor pointer to all interactive elements */
+  button,
+  [role="button"],
+  [data-slot="button"],
+  [data-slot="sidebar-menu-button"],
+  [data-slot="sidebar-menu-action"],
+  [data-slot="sidebar-menu-sub-button"],
+  [data-slot="dropdown-menu-trigger"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-checkbox-item"],
+  [data-slot="dropdown-menu-radio-item"],
+  [data-slot="dropdown-menu-sub-trigger"],
+  [data-slot="command-item"],
+  [data-slot="tabs-trigger"],
+  [data-slot="popover-trigger"],
+  [data-slot="tooltip-trigger"],
+  [data-slot="dialog-trigger"],
+  [data-slot="sheet-trigger"],
+  [data-slot="select-trigger"],
+  [data-slot="select-item"],
+  [data-slot="breadcrumb-link"],
+  [data-slot="sidebar-trigger"],
+  [data-slot="sidebar-rail"],
+  [data-slot="sidebar-group-action"],
+  .cursor-pointer,
+  a {
+    cursor: pointer !important;
+  }
+
+  /* Add disabled cursor styling */
+  [disabled],
+  [aria-disabled="true"],
+  [data-disabled="true"],
+  .disabled {
+    cursor: not-allowed !important;
+  }
 }
