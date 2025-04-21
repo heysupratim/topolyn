@@ -52,10 +52,31 @@ export default function AddItemDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
+  // Form error states
+  const [errors, setErrors] = useState({
+    itemName: "",
+    itemType: "",
+    ipAddress: "",
+  });
+
+  const validateForm = () => {
+    const newErrors = {
+      itemName: !itemName ? "Item name is required" : "",
+      itemType: !itemType ? "Item type is required" : "",
+      ipAddress: !ipAddress ? "IP address is required" : "",
+    };
+
+    setErrors(newErrors);
+
+    // Return true if no errors (all fields filled)
+    return !Object.values(newErrors).some((error) => error);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!itemName || !itemType) {
+    // Validate all fields
+    if (!validateForm()) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -66,7 +87,7 @@ export default function AddItemDialog({
       await inventoryApi.createItem({
         name: itemName,
         type: itemType,
-        ipAddress: ipAddress || undefined,
+        ipAddress: ipAddress,
       });
 
       // Show success message
@@ -76,6 +97,11 @@ export default function AddItemDialog({
       setItemName("");
       setItemType("");
       setIpAddress("");
+      setErrors({
+        itemName: "",
+        itemType: "",
+        ipAddress: "",
+      });
       onOpenChange(false);
 
       // Notify parent component that an item was added
@@ -120,19 +146,34 @@ export default function AddItemDialog({
                 <Label htmlFor="itemName" className="text-right">
                   Item Name
                 </Label>
-                <Input
-                  id="itemName"
-                  value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                  className="col-span-3"
-                  required
-                />
+                <div className="col-span-3 space-y-1">
+                  <Input
+                    id="itemName"
+                    value={itemName}
+                    onChange={(e) => {
+                      setItemName(e.target.value);
+                      if (e.target.value) {
+                        setErrors((prev) => ({ ...prev, itemName: "" }));
+                      }
+                    }}
+                    className={cn(
+                      errors.itemName &&
+                        "border-destructive focus-visible:ring-destructive"
+                    )}
+                    required
+                  />
+                  {errors.itemName && (
+                    <p className="text-sm text-destructive">
+                      {errors.itemName}
+                    </p>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="itemType" className="text-right">
                   Item Type
                 </Label>
-                <div className="col-span-3">
+                <div className="col-span-3 space-y-1">
                   <Popover
                     open={openCombobox}
                     onOpenChange={setOpenCombobox}
@@ -144,7 +185,16 @@ export default function AddItemDialog({
                         ref={triggerRef}
                         role="combobox"
                         aria-expanded={openCombobox}
-                        className="w-full justify-between bg-card"
+                        className={cn(
+                          "w-full justify-between bg-card",
+                          errors.itemType &&
+                            "border-destructive focus-visible:ring-destructive text-destructive"
+                        )}
+                        onClick={() => {
+                          if (errors.itemType) {
+                            setErrors((prev) => ({ ...prev, itemType: "" }));
+                          }
+                        }}
                       >
                         {selectedType ? (
                           <div className="flex items-center">
@@ -188,6 +238,10 @@ export default function AddItemDialog({
                                   setItemType(currentValue);
                                   setOpenCombobox(false);
                                   setSearchQuery("");
+                                  setErrors((prev) => ({
+                                    ...prev,
+                                    itemType: "",
+                                  }));
                                 }}
                                 className="flex items-center"
                               >
@@ -210,18 +264,39 @@ export default function AddItemDialog({
                       </Command>
                     </PopoverContent>
                   </Popover>
+                  {errors.itemType && (
+                    <p className="text-sm text-destructive">
+                      {errors.itemType}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="ipAddress" className="text-right">
                   IP Address
                 </Label>
-                <Input
-                  id="ipAddress"
-                  value={ipAddress}
-                  onChange={(e) => setIpAddress(e.target.value)}
-                  className="col-span-3"
-                />
+                <div className="col-span-3 space-y-1">
+                  <Input
+                    id="ipAddress"
+                    value={ipAddress}
+                    onChange={(e) => {
+                      setIpAddress(e.target.value);
+                      if (e.target.value) {
+                        setErrors((prev) => ({ ...prev, ipAddress: "" }));
+                      }
+                    }}
+                    className={cn(
+                      errors.ipAddress &&
+                        "border-destructive focus-visible:ring-destructive"
+                    )}
+                    required
+                  />
+                  {errors.ipAddress && (
+                    <p className="text-sm text-destructive">
+                      {errors.ipAddress}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
             <DialogFooter className="mt-6">
