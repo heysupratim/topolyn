@@ -6,11 +6,11 @@ import { ReactNode } from "react";
 const pageVariants = {
   initial: {
     opacity: 1,
-    x: "-10%", // Start slightly to the right for enter, left for exit
+    y: "15%", // Start slightly to the right for enter, left for exit
   },
   in: {
     opacity: 1,
-    x: "0%",
+    y: "0%",
   },
 };
 
