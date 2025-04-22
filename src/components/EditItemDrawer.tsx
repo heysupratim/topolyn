@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
-import { Server, Plus, X } from "lucide-react";
+import { Server, Plus, X, Check, ChevronsUpDown } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -14,6 +14,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Command,
+  CommandInput,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -25,6 +38,7 @@ import { itemTypes } from "@/lib/ItemTypes";
 import type { InventoryItem } from "@/context/InventoryContext";
 import { useInventory } from "@/context/InventoryContext";
 import { toast } from "sonner";
+import { cn } from "@/lib/Utils";
 
 interface EditItemDrawerProps {
   item: InventoryItem;
@@ -42,6 +56,9 @@ export function EditItemDrawer({
   const [isUpdating, setIsUpdating] = useState(false);
   const [linkedItems, setLinkedItems] = useState<string[]>([]);
   const [initialLinkedItems, setInitialLinkedItems] = useState<string[]>([]);
+  const [openCombobox, setOpenCombobox] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Get icon component for a given type
   const getIconForType = (type: string) => {
@@ -79,6 +96,7 @@ export function EditItemDrawer({
     const newLinkedItems = [...linkedItems];
     newLinkedItems[index] = value;
     setLinkedItems(newLinkedItems);
+    setOpenCombobox(null);
   };
 
   const handleRemoveLink = (index: number) => {
@@ -129,7 +147,28 @@ export function EditItemDrawer({
     formData.type === "Router" || formData.type === "Switch";
 
   // Filter out the current item from available items to link
-  const availableItems = items.filter((i) => i.id !== formData.id);
+  // Also filter out items that are already selected
+  const getAvailableItems = (currentIndex: number) => {
+    return items
+      .filter(
+        (i) =>
+          i.id !== formData.id &&
+          !linkedItems.some(
+            (linkId, idx) => linkId === i.id && idx !== currentIndex,
+          ),
+      )
+      .filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.type.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+  };
+
+  // Get item name by id
+  const getItemNameById = (id: string) => {
+    const item = items.find((i) => i.id === id);
+    return item ? item.name : "Unknown item";
+  };
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} direction="right">
@@ -188,17 +227,17 @@ export function EditItemDrawer({
 
               {/* Link Nodes Section - Only show for Router and Switch types */}
               {isNetworkDevice && (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <Label>Linked Nodes</Label>
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={handleAddLink}
                       className="flex items-center gap-1"
                     >
                       <Plus className="h-3.5 w-3.5" />
-                      <span>Add Link</span>
+                      <span>Add</span>
                     </Button>
                   </div>
 
@@ -211,29 +250,93 @@ export function EditItemDrawer({
                     <div className="space-y-2">
                       {linkedItems.map((linkedItemId, index) => (
                         <div key={index} className="flex items-center gap-2">
-                          <Select
-                            value={linkedItemId}
-                            onValueChange={(value) =>
-                              handleLinkChange(index, value)
-                            }
+                          <Popover
+                            open={openCombobox === index}
+                            onOpenChange={(open) => {
+                              setOpenCombobox(open ? index : null);
+                              setSearchQuery("");
+                            }}
                           >
-                            <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="Select an item to link" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableItems.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>
-                                  <div className="flex items-center gap-2">
-                                    {getIconForType(item.type)}
-                                    <span>{item.name}</span>
-                                    <span className="text-muted-foreground text-xs">
-                                      ({item.type})
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                ref={triggerRef}
+                                role="combobox"
+                                aria-expanded={openCombobox === index}
+                                className="flex-1 justify-between bg-transparent"
+                              >
+                                {linkedItemId ? (
+                                  <div className="flex items-center">
+                                    {getIconForType(
+                                      items.find((i) => i.id === linkedItemId)
+                                        ?.type || "",
+                                    )}
+                                    <span className="ml-2">
+                                      {getItemNameById(linkedItemId)}
                                     </span>
                                   </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                                ) : (
+                                  "Select an item to link"
+                                )}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="p-0"
+                              align="start"
+                              side="bottom"
+                              sideOffset={4}
+                              style={{
+                                width: triggerRef.current?.offsetWidth
+                                  ? `${triggerRef.current.offsetWidth}px`
+                                  : "auto",
+                              }}
+                            >
+                              <Command>
+                                <CommandInput
+                                  placeholder="Search items..."
+                                  className="h-9"
+                                  value={searchQuery}
+                                  onValueChange={setSearchQuery}
+                                />
+                                <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
+                                  <CommandEmpty>
+                                    No matching items found.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {getAvailableItems(index).map((item) => (
+                                      <CommandItem
+                                        key={item.id}
+                                        value={item.id}
+                                        onSelect={(currentValue) => {
+                                          handleLinkChange(index, currentValue);
+                                          setOpenCombobox(null);
+                                          setSearchQuery("");
+                                        }}
+                                        className="flex items-center"
+                                      >
+                                        {getIconForType(item.type)}
+                                        <span className="ml-2">
+                                          {item.name}
+                                        </span>
+                                        <span className="text-muted-foreground ml-2 text-xs">
+                                          ({item.type})
+                                        </span>
+                                        <Check
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            linkedItemId === item.id
+                                              ? "opacity-100"
+                                              : "opacity-0",
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           <Button
                             variant="ghost"
                             size="icon"
