@@ -5,6 +5,25 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Topolyn</title>
+    <script>
+      // This script prevents flickering when switching between light and dark modes
+      (function () {
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        const storedTheme = localStorage.getItem("theme");
+
+        if (
+          storedTheme === "dark" ||
+          (storedTheme === "system" && prefersDark) ||
+          (!storedTheme && prefersDark)
+        ) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

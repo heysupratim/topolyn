@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import AddItemDialog from "./AddItemDialog";
 import { useInventory } from "@/context/InventoryContext";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function AppHeader() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -25,6 +26,7 @@ export function AppHeader() {
         />
         <h1 className="text-base font-medium">Inventory</h1>
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           <Button
             title="Quick Create"
             variant="default"
