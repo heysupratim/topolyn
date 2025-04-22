@@ -5,24 +5,20 @@ import { ReactNode } from "react";
 // Animation variants for page transitions
 const pageVariants = {
   initial: {
-    opacity: 0,
-    x: "5%", // Start slightly to the right for enter, left for exit
+    opacity: 1,
+    x: "-10%", // Start slightly to the right for enter, left for exit
   },
   in: {
     opacity: 1,
-    x: 0,
-  },
-  exit: {
-    opacity: 0,
-    x: "-5%",
+    x: "0%",
   },
 };
 
 // Animation transition configuration
 const pageTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.3, // Quick but smooth transition
+  type: "spring",
+  ease: "easeIn",
+  duration: 0.75, // Quick but smooth transition
 };
 
 interface AnimatedRoutesProps {
