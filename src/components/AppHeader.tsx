@@ -6,10 +6,20 @@ import { useState } from "react";
 import AddItemDialog from "./AddItemDialog";
 import { useInventory } from "@/context/InventoryContext";
 import { ThemeToggle } from "./ThemeToggle";
+import { useLocation } from "react-router-dom";
 
 export function AppHeader() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { refreshInventory } = useInventory();
+  const location = useLocation();
+
+  // Get the route name based on the current path
+  const getRouteName = () => {
+    const path = location.pathname;
+    if (path.includes("inventory")) return "Inventory";
+    if (path.includes("map")) return "Map";
+    return "Dashboard";
+  };
 
   const handleItemAdded = () => {
     // Use the context's refresh function instead of dispatching an event
@@ -24,7 +34,7 @@ export function AppHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="text-base font-medium">Inventory</h1>
+        <h1 className="text-base font-medium">{getRouteName()}</h1>
         <div className="ml-auto flex items-center gap-4">
           <ThemeToggle />
           <Button
