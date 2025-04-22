@@ -89,6 +89,7 @@ export function EditItemDrawer({
   const [searchQuery, setSearchQuery] = useState("");
   const [linkTypeFilter, setLinkTypeFilter] = useState("");
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const linkTypeTriggerRef = useRef<HTMLButtonElement>(null);
 
   // Get icon component for a given type
   const getIconForType = (type: string) => {
@@ -451,6 +452,7 @@ export function EditItemDrawer({
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
+                                  ref={linkTypeTriggerRef}
                                   role="combobox"
                                   aria-expanded={openLinkTypeSelect === index}
                                   className="justify-between bg-transparent"
@@ -466,6 +468,11 @@ export function EditItemDrawer({
                                 align="start"
                                 side="bottom"
                                 sideOffset={4}
+                                style={{
+                                  width: linkTypeTriggerRef.current?.offsetWidth
+                                    ? `${linkTypeTriggerRef.current.offsetWidth}px`
+                                    : "auto",
+                                }}
                               >
                                 <Command>
                                   <CommandInput
