@@ -227,7 +227,7 @@ export default function AddItemDialog({
                           value={searchQuery}
                           onValueChange={setSearchQuery}
                         />
-                        <CommandList className="max-h-[200px] w-full overflow-y-auto scroll-auto">
+                        <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
                           <CommandEmpty>No item type found.</CommandEmpty>
                           <CommandGroup>
                             {filteredItemTypes.map((type) => (

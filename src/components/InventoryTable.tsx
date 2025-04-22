@@ -1,21 +1,32 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Filter, X, CheckIcon } from "lucide-react";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CheckIcon, ChevronsUpDown, Filter, X } from "lucide-react";
 import { itemTypes } from "@/lib/ItemTypes";
 import { InventoryItemCard } from "@/components/InventoryItemCard";
+import { cn } from "@/lib/Utils";
 
 export function InventoryTable() {
   const { items, isLoading } = useInventory();
   const [nameFilter, setNameFilter] = useState("");
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
+  const [openFilterPopover, setOpenFilterPopover] = useState(false);
+  const [searchTypeQuery, setSearchTypeQuery] = useState("");
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Filter items by name and type
   const filteredItems = items.filter((item) => {
@@ -27,7 +38,7 @@ export function InventoryTable() {
     return matchesName && matchesType;
   });
 
-  // Handle checkbox toggle
+  // Toggle type filter
   const toggleTypeFilter = (value: string) => {
     setTypeFilters((current) =>
       current.includes(value)
@@ -40,6 +51,11 @@ export function InventoryTable() {
   const clearTypeFilters = () => {
     setTypeFilters([]);
   };
+
+  // Filter item types based on search query
+  const filteredItemTypes = itemTypes.filter((type) =>
+    type.label.toLowerCase().includes(searchTypeQuery.toLowerCase()),
+  );
 
   return (
     <div className="space-y-4">
@@ -62,9 +78,10 @@ export function InventoryTable() {
               Clear filters
             </Button>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Popover open={openFilterPopover} onOpenChange={setOpenFilterPopover}>
+            <PopoverTrigger asChild>
               <Button
+                ref={triggerRef}
                 variant="outline"
                 className="bg-card flex items-center gap-2"
               >
@@ -77,32 +94,54 @@ export function InventoryTable() {
                     selected
                   </>
                 )}
+                <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="">
-              {itemTypes.map((type) => {
-                const Icon = type.icon;
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={type.value}
-                    checked={typeFilters.includes(type.value)}
-                    onCheckedChange={() => toggleTypeFilter(type.value)}
-                    className="relative flex items-center justify-between pr-8 pl-2"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-4 w-4" />
-                      {type.label}
-                    </div>
-                    {typeFilters.includes(type.value) && (
-                      <span className="absolute right-2 flex items-center justify-center">
-                        <CheckIcon className="h-4 w-4" />
-                      </span>
-                    )}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </PopoverTrigger>
+            <PopoverContent
+              className="p-0"
+              align="end"
+              side="bottom"
+              sideOffset={4}
+            >
+              <Command>
+                <CommandInput
+                  placeholder="Search item types..."
+                  className="h-9"
+                  value={searchTypeQuery}
+                  onValueChange={setSearchTypeQuery}
+                />
+                <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
+                  <CommandEmpty>No item types found.</CommandEmpty>
+                  <CommandGroup>
+                    {filteredItemTypes.map((type) => {
+                      const Icon = type.icon;
+                      return (
+                        <CommandItem
+                          key={type.value}
+                          value={type.value}
+                          onSelect={() => toggleTypeFilter(type.value)}
+                          className="flex items-center"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon className="h-4 w-4" />
+                            {type.label}
+                          </div>
+                          <CheckIcon
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              typeFilters.includes(type.value)
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
