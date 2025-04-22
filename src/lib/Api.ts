@@ -25,8 +25,10 @@ export const inventoryApi = {
   },
 
   // Get all inventory items
-  getAllItems: async () => {
-    const response = await apiClient.get("/inventory");
+  getAllItems: async (includeLinks = false) => {
+    const response = await apiClient.get(
+      `/inventory?includeLinks=${includeLinks}`,
+    );
     return response.data;
   },
 
@@ -51,6 +53,28 @@ export const inventoryApi = {
   // Delete an inventory item
   deleteItem: async (id: string) => {
     const response = await apiClient.delete(`/inventory/${id}`);
+    return response.data;
+  },
+
+  // Get linked items for a specific inventory item
+  getItemLinks: async (id: string) => {
+    const response = await apiClient.get(`/inventory/${id}/links`);
+    return response.data;
+  },
+
+  // Add a link between two inventory items
+  addItemLink: async (id: string, linkedItemId: string) => {
+    const response = await apiClient.post(`/inventory/${id}/links`, {
+      linkedItemId,
+    });
+    return response.data;
+  },
+
+  // Remove a link between two inventory items
+  removeItemLink: async (id: string, linkedItemId: string) => {
+    const response = await apiClient.delete(
+      `/inventory/${id}/links/${linkedItemId}`,
+    );
     return response.data;
   },
 };

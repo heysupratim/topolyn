@@ -15,6 +15,8 @@ export type InventoryItem = {
   ipAddress: string | null;
   createdAt: Date;
   updatedAt: Date;
+  linkedToItems?: InventoryItem[];
+  linkedFromItems?: InventoryItem[];
 };
 
 // Define the shape of our context
@@ -25,6 +27,9 @@ interface InventoryContextType {
   refreshInventory: () => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   updateItem: (item: InventoryItem) => Promise<void>;
+  getItemLinks: (id: string) => Promise<InventoryItem[]>;
+  addItemLink: (id: string, linkedItemId: string) => Promise<void>;
+  removeItemLink: (id: string, linkedItemId: string) => Promise<void>;
 }
 
 // Create the context with a default value
@@ -48,7 +53,7 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await inventoryApi.getAllItems();
+      const data = await inventoryApi.getAllItems(true); // Include links by default
       setItems(data);
     } catch (err) {
       console.error("Failed to fetch inventory items:", err);
@@ -103,6 +108,62 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     }
   };
 
+  // Function to get links for a specific item
+  const getItemLinks = async (id: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const links = await inventoryApi.getItemLinks(id);
+      return links;
+    } catch (err) {
+      console.error("Failed to get item links:", err);
+      setError(
+        err instanceof Error ? err : new Error("Failed to get item links"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to add a link between two items
+  const addItemLink = async (id: string, linkedItemId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await inventoryApi.addItemLink(id, linkedItemId);
+      // Refresh the inventory after adding the link
+      await refreshInventory();
+    } catch (err) {
+      console.error("Failed to add item link:", err);
+      setError(
+        err instanceof Error ? err : new Error("Failed to add item link"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to remove a link between two items
+  const removeItemLink = async (id: string, linkedItemId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await inventoryApi.removeItemLink(id, linkedItemId);
+      // Refresh the inventory after removing the link
+      await refreshInventory();
+    } catch (err) {
+      console.error("Failed to remove item link:", err);
+      setError(
+        err instanceof Error ? err : new Error("Failed to remove item link"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Initial data fetch
   useEffect(() => {
     refreshInventory();
@@ -116,6 +177,9 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     refreshInventory,
     deleteItem,
     updateItem,
+    getItemLinks,
+    addItemLink,
+    removeItemLink,
   };
 
   return (
