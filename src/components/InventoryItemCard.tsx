@@ -92,7 +92,7 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
             >
               <Trash2 className="h-4 w-4" />
               <span
-                className={`mr-1 overflow-hidden transition-all duration-300 ease-in-out ${isDialogOpen ? "max-w-xs" : "max-w-0 group-hover:mr-2 group-hover:max-w-xs"}`}
+                className={`mr-1 overflow-hidden transition-all duration-300 ease-in-out ${isDialogOpen ? "mr-2 max-w-xs" : "max-w-0 group-hover:mr-2 group-hover:max-w-xs"}`}
               >
                 Remove
               </span>
