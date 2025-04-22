@@ -357,23 +357,23 @@ export function EditItemDrawer({
                                   ref={triggerRef}
                                   role="combobox"
                                   aria-expanded={openCombobox === index}
-                                  className="flex-1 justify-between bg-transparent"
+                                  className="w-3/4 flex-1 justify-between bg-transparent"
                                 >
                                   {link.targetItemId ? (
-                                    <div className="flex items-center">
+                                    <div className="flex w-full items-center overflow-hidden">
                                       {getIconForType(
                                         items.find(
                                           (i) => i.id === link.targetItemId,
                                         )?.type || "",
                                       )}
-                                      <span className="ml-2">
+                                      <span className="ml-2 truncate overflow-hidden text-ellipsis whitespace-nowrap">
                                         {getItemNameById(link.targetItemId)}
                                       </span>
                                     </div>
                                   ) : (
                                     "Select an item to link"
                                   )}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 flex-none shrink-0 opacity-50" />
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent
@@ -451,10 +451,12 @@ export function EditItemDrawer({
                                   variant="outline"
                                   role="combobox"
                                   aria-expanded={openLinkTypeSelect === index}
-                                  className="w-36 justify-between bg-transparent"
+                                  className="w-1/4 justify-between bg-transparent"
                                 >
-                                  {link.linkType || "Select type"}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  <span className="truncate overflow-hidden text-ellipsis whitespace-nowrap">
+                                    {link.linkType || "Select type"}
+                                  </span>
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 flex-none shrink-0 opacity-50" />
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent
