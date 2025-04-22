@@ -42,20 +42,20 @@ import { cn } from "@/lib/Utils";
 
 // Define all available link types
 const LINK_TYPES = [
-  "10BASE-T",
-  "100BASE-T",
-  "1000BASE-T",
-  "2.5GBASE-T",
-  "5GBASE-T",
-  "10GBASE-T",
-  "25GBASE-T",
-  "40GBASE-T",
-  "50GBASE-T",
-  "100GBASE-T",
-  "200GBASE-T",
-  "400GBASE-T",
-  "800GBASE-T",
-  "1TBASE-T",
+  "10Mbps",
+  "100Mbps",
+  "1Gbps",
+  "2.5Gbps",
+  "5Gbps",
+  "10Gbps",
+  "25Gbps",
+  "40Gbps",
+  "50Gbps",
+  "100Gbps",
+  "200Gbps",
+  "400Gbps",
+  "800Gbps",
+  "1Tbps",
 ];
 
 interface EditItemDrawerProps {
