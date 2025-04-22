@@ -23,12 +23,12 @@ const data = {
   navMain: [
     {
       title: "Inventory",
-      url: "#",
+      url: "/inventory",
       icon: LayoutList,
     },
     {
       title: "Map",
-      url: "#",
+      url: "/map",
       icon: Workflow,
     },
   ],
@@ -45,7 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <a href="/">
                 <Box className="!size-5" />
                 <span className="text-base font-semibold">Topolyn</span>
               </a>

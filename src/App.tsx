@@ -1,32 +1,25 @@
-import { AppSidebar } from "@/components/AppSidebar";
-import { AppHeader } from "@/components/AppHeader";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { InventoryTable } from "@/components/InventoryTable";
 import { InventoryProvider } from "@/context/InventoryContext";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AppLayout } from "@/components/AppLayout";
+import { InventoryView } from "@/components/InventoryView";
+import { MapView } from "@/components/MapView";
 
 export default function App() {
   return (
     <ThemeProvider>
       <InventoryProvider>
-        <SidebarProvider>
-          <AppSidebar variant="inset" />
-          <SidebarInset>
-            <AppHeader />
-            <div className="flex flex-1 flex-col">
-              <div className="@container/main flex flex-1 flex-col gap-2">
-                <div
-                  id="nodelist"
-                  className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:gap-2 lg:px-6"
-                >
-                  <InventoryTable />
-                </div>
-              </div>
-            </div>
-          </SidebarInset>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<AppLayout />}>
+              <Route index element={<Navigate to="/inventory" replace />} />
+              <Route path="inventory" element={<InventoryView />} />
+              <Route path="map" element={<MapView />} />
+            </Route>
+          </Routes>
           <Toaster position="bottom-right" />
-        </SidebarProvider>
+        </BrowserRouter>
       </InventoryProvider>
     </ThemeProvider>
   );
