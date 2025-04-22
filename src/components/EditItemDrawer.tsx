@@ -265,7 +265,7 @@ export function EditItemDrawer({
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} direction="right">
       <DrawerContent
-        className="bg-card flex h-full flex-col px-1 py-8 data-[vaul-drawer-direction=right]:sm:max-w-sm"
+        className="bg-card flex h-full flex-col px-1 py-8 data-[vaul-drawer-direction=right]:sm:max-w-md"
         data-vaul-no-drag
       >
         <div className="mx-auto w-full flex-1 overflow-y-auto">
@@ -345,6 +345,7 @@ export function EditItemDrawer({
                           <div className="flex items-center gap-2">
                             {/* Item selection */}
                             <Popover
+                              modal
                               open={openCombobox === index}
                               onOpenChange={(open) => {
                                 setOpenCombobox(open ? index : null);
@@ -357,7 +358,7 @@ export function EditItemDrawer({
                                   ref={triggerRef}
                                   role="combobox"
                                   aria-expanded={openCombobox === index}
-                                  className="w-3/4 flex-1 justify-between bg-transparent"
+                                  className="w-1/2 flex-1 justify-between bg-transparent"
                                 >
                                   {link.targetItemId ? (
                                     <div className="flex w-full items-center overflow-hidden">
@@ -440,6 +441,7 @@ export function EditItemDrawer({
 
                             {/* Link type selection */}
                             <Popover
+                              modal
                               open={openLinkTypeSelect === index}
                               onOpenChange={(open) => {
                                 setOpenLinkTypeSelect(open ? index : null);
@@ -451,7 +453,7 @@ export function EditItemDrawer({
                                   variant="outline"
                                   role="combobox"
                                   aria-expanded={openLinkTypeSelect === index}
-                                  className="w-1/4 justify-between bg-transparent"
+                                  className="justify-between bg-transparent"
                                 >
                                   <span className="truncate overflow-hidden text-ellipsis whitespace-nowrap">
                                     {link.linkType || "Select type"}
@@ -472,7 +474,7 @@ export function EditItemDrawer({
                                     value={linkTypeFilter}
                                     onValueChange={setLinkTypeFilter}
                                   />
-                                  <CommandList className="max-h-[200px] w-full overflow-y-auto scroll-auto">
+                                  <CommandList className="max-h-[200px] overflow-y-auto scroll-auto">
                                     <CommandEmpty>
                                       No matching link types found.
                                     </CommandEmpty>
