@@ -229,7 +229,7 @@ export function EditItemDrawer({
               {isNetworkDevice && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label>Linked Nodes</Label>
+                    <Label>Linked Items</Label>
                     <Button
                       variant="secondary"
                       size="sm"
@@ -313,15 +313,15 @@ export function EditItemDrawer({
                                           setOpenCombobox(null);
                                           setSearchQuery("");
                                         }}
-                                        className="flex items-center"
+                                        className="flex items-center gap-2"
                                       >
                                         {getIconForType(item.type)}
-                                        <span className="ml-2">
-                                          {item.name}
-                                        </span>
-                                        <span className="text-muted-foreground ml-2 text-xs">
-                                          ({item.type})
-                                        </span>
+                                        <div className="flex flex-col gap-1">
+                                          <span className="">{item.name}</span>
+                                          <span className="text-muted-foreground text-xs">
+                                            ({item.type})
+                                          </span>
+                                        </div>
                                         <Check
                                           className={cn(
                                             "ml-auto h-4 w-4",
