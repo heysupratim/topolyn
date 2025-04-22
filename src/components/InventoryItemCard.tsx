@@ -88,10 +88,14 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
               variant="secondary"
               size="sm"
               onClick={openDeleteDialog}
-              className="flex items-center gap-1"
+              className={`group flex items-center justify-center overflow-hidden pr-0! pl-2! ${isDialogOpen ? "expanded" : ""}`}
             >
               <Trash2 className="h-4 w-4" />
-              Remove
+              <span
+                className={`mr-1 overflow-hidden transition-all duration-300 ease-in-out ${isDialogOpen ? "max-w-xs" : "max-w-0 group-hover:mr-2 group-hover:max-w-xs"}`}
+              >
+                Remove
+              </span>
             </Button>
           </div>
         </CardContent>
