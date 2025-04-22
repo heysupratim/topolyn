@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import {
   Command,
@@ -26,7 +26,6 @@ export function InventoryTable() {
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
   const [searchTypeQuery, setSearchTypeQuery] = useState("");
-  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Filter items by name and type
   const filteredItems = items.filter((item) => {
@@ -81,7 +80,6 @@ export function InventoryTable() {
           <Popover open={openFilterPopover} onOpenChange={setOpenFilterPopover}>
             <PopoverTrigger asChild>
               <Button
-                ref={triggerRef}
                 variant="outline"
                 className="bg-card flex items-center gap-2"
               >
