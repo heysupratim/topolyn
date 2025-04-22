@@ -76,7 +76,10 @@ export function EditItemDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="bg-card flex h-full max-w-md flex-col py-8">
+      <DrawerContent
+        className="bg-card flex h-full max-w-md flex-col py-8"
+        data-vaul-no-drag
+      >
         <div className="mx-auto w-full max-w-sm flex-1 overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>Edit Item Details</DrawerTitle>
