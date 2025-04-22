@@ -15,8 +15,19 @@ export type InventoryItem = {
   ipAddress: string | null;
   createdAt: Date;
   updatedAt: Date;
-  linkedToItems?: InventoryItem[];
-  linkedFromItems?: InventoryItem[];
+  outgoingLinks?: ItemLink[];
+  incomingLinks?: ItemLink[];
+};
+
+// Define the shape of an item link
+export type ItemLink = {
+  id: string;
+  linkType: string;
+  sourceItemId: string;
+  targetItemId: string;
+  sourceItem?: InventoryItem;
+  targetItem?: InventoryItem;
+  createdAt: Date;
 };
 
 // Define the shape of our context
@@ -27,9 +38,18 @@ interface InventoryContextType {
   refreshInventory: () => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   updateItem: (item: InventoryItem) => Promise<void>;
-  getItemLinks: (id: string) => Promise<InventoryItem[]>;
-  addItemLink: (id: string, linkedItemId: string) => Promise<void>;
-  removeItemLink: (id: string, linkedItemId: string) => Promise<void>;
+  getItemLinks: (id: string) => Promise<ItemLink[]>;
+  addItemLink: (
+    id: string,
+    linkedItemId: string,
+    linkType: string,
+  ) => Promise<void>;
+  updateItemLink: (
+    id: string,
+    linkId: string,
+    linkType: string,
+  ) => Promise<void>;
+  removeItemLink: (id: string, linkId: string) => Promise<void>;
 }
 
 // Create the context with a default value
@@ -127,11 +147,15 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
   };
 
   // Function to add a link between two items
-  const addItemLink = async (id: string, linkedItemId: string) => {
+  const addItemLink = async (
+    id: string,
+    linkedItemId: string,
+    linkType: string,
+  ) => {
     try {
       setIsLoading(true);
       setError(null);
-      await inventoryApi.addItemLink(id, linkedItemId);
+      await inventoryApi.addItemLink(id, linkedItemId, linkType);
       // Refresh the inventory after adding the link
       await refreshInventory();
     } catch (err) {
@@ -145,12 +169,35 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     }
   };
 
-  // Function to remove a link between two items
-  const removeItemLink = async (id: string, linkedItemId: string) => {
+  // Function to update a link between two items
+  const updateItemLink = async (
+    id: string,
+    linkId: string,
+    linkType: string,
+  ) => {
     try {
       setIsLoading(true);
       setError(null);
-      await inventoryApi.removeItemLink(id, linkedItemId);
+      await inventoryApi.updateItemLink(id, linkId, linkType);
+      // Refresh the inventory after updating the link
+      await refreshInventory();
+    } catch (err) {
+      console.error("Failed to update item link:", err);
+      setError(
+        err instanceof Error ? err : new Error("Failed to update item link"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to remove a link between two items
+  const removeItemLink = async (id: string, linkId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await inventoryApi.removeItemLink(id, linkId);
       // Refresh the inventory after removing the link
       await refreshInventory();
     } catch (err) {
@@ -179,6 +226,7 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     updateItem,
     getItemLinks,
     addItemLink,
+    updateItemLink,
     removeItemLink,
   };
 

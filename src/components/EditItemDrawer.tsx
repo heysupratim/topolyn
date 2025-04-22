@@ -40,10 +40,35 @@ import { useInventory } from "@/context/InventoryContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/Utils";
 
+// Define all available link types
+const LINK_TYPES = [
+  "10BASE-T",
+  "100BASE-T",
+  "1000BASE-T",
+  "2.5GBASE-T",
+  "5GBASE-T",
+  "10GBASE-T",
+  "25GBASE-T",
+  "40GBASE-T",
+  "50GBASE-T",
+  "100GBASE-T",
+  "200GBASE-T",
+  "400GBASE-T",
+  "800GBASE-T",
+  "1TBASE-T",
+];
+
 interface EditItemDrawerProps {
   item: InventoryItem;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+// Interface for link state with both target and type
+interface LinkState {
+  targetItemId: string;
+  linkType: string;
+  linkId?: string; // Existing link ID, if available
 }
 
 export function EditItemDrawer({
@@ -51,13 +76,18 @@ export function EditItemDrawer({
   isOpen,
   onOpenChange,
 }: EditItemDrawerProps) {
-  const { updateItem, items, addItemLink, removeItemLink } = useInventory();
+  const { updateItem, items, addItemLink, updateItemLink, removeItemLink } =
+    useInventory();
   const [formData, setFormData] = useState<InventoryItem>({ ...item });
   const [isUpdating, setIsUpdating] = useState(false);
-  const [linkedItems, setLinkedItems] = useState<string[]>([]);
-  const [initialLinkedItems, setInitialLinkedItems] = useState<string[]>([]);
+  const [itemLinks, setItemLinks] = useState<LinkState[]>([]);
+  const [initialItemLinks, setInitialItemLinks] = useState<LinkState[]>([]);
   const [openCombobox, setOpenCombobox] = useState<number | null>(null);
+  const [openLinkTypeSelect, setOpenLinkTypeSelect] = useState<number | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState("");
+  const [linkTypeFilter, setLinkTypeFilter] = useState("");
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Get icon component for a given type
@@ -70,12 +100,16 @@ export function EditItemDrawer({
     return <Server className="h-4 w-4" />; // Default icon
   };
 
-  // Initialize linked items from the current item
+  // Initialize links from the current item
   useEffect(() => {
-    if (item && item.linkedToItems) {
-      const linkedIds = item.linkedToItems.map((linkedItem) => linkedItem.id);
-      setLinkedItems(linkedIds);
-      setInitialLinkedItems(linkedIds);
+    if (item && item.outgoingLinks) {
+      const links = item.outgoingLinks.map((link) => ({
+        targetItemId: link.targetItemId,
+        linkType: link.linkType,
+        linkId: link.id,
+      }));
+      setItemLinks(links);
+      setInitialItemLinks(links);
     }
   }, [item]);
 
@@ -89,20 +123,33 @@ export function EditItemDrawer({
   };
 
   const handleAddLink = () => {
-    setLinkedItems([...linkedItems, ""]);
+    setItemLinks([...itemLinks, { targetItemId: "", linkType: LINK_TYPES[0] }]);
   };
 
-  const handleLinkChange = (index: number, value: string) => {
-    const newLinkedItems = [...linkedItems];
-    newLinkedItems[index] = value;
-    setLinkedItems(newLinkedItems);
+  const handleLinkTargetChange = (index: number, targetItemId: string) => {
+    const newItemLinks = [...itemLinks];
+    newItemLinks[index] = {
+      ...newItemLinks[index],
+      targetItemId,
+    };
+    setItemLinks(newItemLinks);
     setOpenCombobox(null);
   };
 
+  const handleLinkTypeChange = (index: number, linkType: string) => {
+    const newItemLinks = [...itemLinks];
+    newItemLinks[index] = {
+      ...newItemLinks[index],
+      linkType,
+    };
+    setItemLinks(newItemLinks);
+    setOpenLinkTypeSelect(null);
+  };
+
   const handleRemoveLink = (index: number) => {
-    const newLinkedItems = [...linkedItems];
-    newLinkedItems.splice(index, 1);
-    setLinkedItems(newLinkedItems);
+    const newItemLinks = [...itemLinks];
+    newItemLinks.splice(index, 1);
+    setItemLinks(newItemLinks);
   };
 
   const handleSave = async () => {
@@ -112,24 +159,62 @@ export function EditItemDrawer({
       // First update the item details
       await updateItem(formData);
 
-      // Process item links
-      const itemsToAdd = linkedItems.filter(
-        (id) => id && !initialLinkedItems.includes(id),
+      // Process link changes
+      // Find links to add (new items)
+      const linksToAdd = itemLinks.filter(
+        (link) =>
+          link.targetItemId &&
+          !initialItemLinks.some(
+            (initLink) => initLink.targetItemId === link.targetItemId,
+          ),
       );
-      const itemsToRemove = initialLinkedItems.filter(
-        (id) => !linkedItems.includes(id),
+
+      // Find links to update (existing items with changed link type)
+      const linksToUpdate = itemLinks.filter((link) => {
+        const matchingInitialLink = initialItemLinks.find(
+          (initLink) => initLink.targetItemId === link.targetItemId,
+        );
+        return (
+          matchingInitialLink &&
+          matchingInitialLink.linkType !== link.linkType &&
+          matchingInitialLink.linkId
+        );
+      });
+
+      // Find links to remove (items no longer in the list)
+      const linksToRemove = initialItemLinks.filter(
+        (initLink) =>
+          !itemLinks.some(
+            (link) => link.targetItemId === initLink.targetItemId,
+          ) && initLink.linkId,
       );
 
       // Add new links
-      for (const linkedItemId of itemsToAdd) {
-        if (linkedItemId) {
-          await addItemLink(formData.id, linkedItemId);
+      for (const link of linksToAdd) {
+        if (link.targetItemId) {
+          await addItemLink(formData.id, link.targetItemId, link.linkType);
+        }
+      }
+
+      // Update changed links
+      for (const link of linksToUpdate) {
+        const matchingInitialLink = initialItemLinks.find(
+          (initLink) => initLink.targetItemId === link.targetItemId,
+        );
+        if (matchingInitialLink?.linkId) {
+          await updateItemLink(
+            formData.id,
+            matchingInitialLink.linkId,
+            link.linkType,
+          );
         }
       }
 
       // Remove deleted links
-      for (const linkedItemId of itemsToRemove) {
-        await removeItemLink(formData.id, linkedItemId);
+      for (const link of linksToRemove) {
+        if (link.linkId) {
+          await removeItemLink(formData.id, link.linkId);
+        }
       }
 
       onOpenChange(false);
@@ -153,8 +238,8 @@ export function EditItemDrawer({
       .filter(
         (i) =>
           i.id !== formData.id &&
-          !linkedItems.some(
-            (linkId, idx) => linkId === i.id && idx !== currentIndex,
+          !itemLinks.some(
+            (link, idx) => link.targetItemId === i.id && idx !== currentIndex,
           ),
       )
       .filter(
@@ -162,6 +247,13 @@ export function EditItemDrawer({
           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           item.type.toLowerCase().includes(searchQuery.toLowerCase()),
       );
+  };
+
+  // Get filtered link types based on search
+  const getFilteredLinkTypes = () => {
+    return LINK_TYPES.filter((type) =>
+      type.toLowerCase().includes(linkTypeFilter.toLowerCase()),
+    );
   };
 
   // Get item name by id
@@ -241,109 +333,187 @@ export function EditItemDrawer({
                     </Button>
                   </div>
 
-                  {linkedItems.length === 0 ? (
+                  {itemLinks.length === 0 ? (
                     <div className="text-muted-foreground py-2 text-sm">
                       No links added. Click "Add Link" to connect this device to
                       other items.
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {linkedItems.map((linkedItemId, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <Popover
-                            open={openCombobox === index}
-                            onOpenChange={(open) => {
-                              setOpenCombobox(open ? index : null);
-                              setSearchQuery("");
-                            }}
-                          >
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                ref={triggerRef}
-                                role="combobox"
-                                aria-expanded={openCombobox === index}
-                                className="flex-1 justify-between bg-transparent"
-                              >
-                                {linkedItemId ? (
-                                  <div className="flex items-center">
-                                    {getIconForType(
-                                      items.find((i) => i.id === linkedItemId)
-                                        ?.type || "",
-                                    )}
-                                    <span className="ml-2">
-                                      {getItemNameById(linkedItemId)}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  "Select an item to link"
-                                )}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="p-0"
-                              align="start"
-                              side="bottom"
-                              sideOffset={4}
-                              style={{
-                                width: triggerRef.current?.offsetWidth
-                                  ? `${triggerRef.current.offsetWidth}px`
-                                  : "auto",
+                      {itemLinks.map((link, index) => (
+                        <div key={index} className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            {/* Item selection */}
+                            <Popover
+                              open={openCombobox === index}
+                              onOpenChange={(open) => {
+                                setOpenCombobox(open ? index : null);
+                                setSearchQuery("");
                               }}
                             >
-                              <Command>
-                                <CommandInput
-                                  placeholder="Search items..."
-                                  className="h-9"
-                                  value={searchQuery}
-                                  onValueChange={setSearchQuery}
-                                />
-                                <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
-                                  <CommandEmpty>
-                                    No matching items found.
-                                  </CommandEmpty>
-                                  <CommandGroup>
-                                    {getAvailableItems(index).map((item) => (
-                                      <CommandItem
-                                        key={item.id}
-                                        value={item.id}
-                                        onSelect={(currentValue) => {
-                                          handleLinkChange(index, currentValue);
-                                          setOpenCombobox(null);
-                                          setSearchQuery("");
-                                        }}
-                                        className="flex items-center gap-2"
-                                      >
-                                        {getIconForType(item.type)}
-                                        <div className="flex flex-col gap-1">
-                                          <span className="">{item.name}</span>
-                                          <span className="text-muted-foreground text-xs">
-                                            ({item.type})
-                                          </span>
-                                        </div>
-                                        <Check
-                                          className={cn(
-                                            "ml-auto h-4 w-4",
-                                            linkedItemId === item.id
-                                              ? "opacity-100"
-                                              : "opacity-0",
-                                          )}
-                                        />
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveLink(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  ref={triggerRef}
+                                  role="combobox"
+                                  aria-expanded={openCombobox === index}
+                                  className="flex-1 justify-between bg-transparent"
+                                >
+                                  {link.targetItemId ? (
+                                    <div className="flex items-center">
+                                      {getIconForType(
+                                        items.find(
+                                          (i) => i.id === link.targetItemId,
+                                        )?.type || "",
+                                      )}
+                                      <span className="ml-2">
+                                        {getItemNameById(link.targetItemId)}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    "Select an item to link"
+                                  )}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="p-0"
+                                align="start"
+                                side="bottom"
+                                sideOffset={4}
+                                style={{
+                                  width: triggerRef.current?.offsetWidth
+                                    ? `${triggerRef.current.offsetWidth}px`
+                                    : "auto",
+                                }}
+                              >
+                                <Command>
+                                  <CommandInput
+                                    placeholder="Search items..."
+                                    className="h-9"
+                                    value={searchQuery}
+                                    onValueChange={setSearchQuery}
+                                  />
+                                  <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
+                                    <CommandEmpty>
+                                      No matching items found.
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {getAvailableItems(index).map((item) => (
+                                        <CommandItem
+                                          key={item.id}
+                                          value={item.id}
+                                          onSelect={(currentValue) => {
+                                            handleLinkTargetChange(
+                                              index,
+                                              currentValue,
+                                            );
+                                            setOpenCombobox(null);
+                                            setSearchQuery("");
+                                          }}
+                                          className="flex items-center gap-2"
+                                        >
+                                          {getIconForType(item.type)}
+                                          <div className="flex flex-col gap-1">
+                                            <span className="">
+                                              {item.name}
+                                            </span>
+                                            <span className="text-muted-foreground text-xs">
+                                              ({item.type})
+                                            </span>
+                                          </div>
+                                          <Check
+                                            className={cn(
+                                              "ml-auto h-4 w-4",
+                                              link.targetItemId === item.id
+                                                ? "opacity-100"
+                                                : "opacity-0",
+                                            )}
+                                          />
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+
+                            {/* Link type selection */}
+                            <Popover
+                              open={openLinkTypeSelect === index}
+                              onOpenChange={(open) => {
+                                setOpenLinkTypeSelect(open ? index : null);
+                                setLinkTypeFilter("");
+                              }}
+                            >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  aria-expanded={openLinkTypeSelect === index}
+                                  className="w-36 justify-between bg-transparent"
+                                >
+                                  {link.linkType || "Select type"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="p-0"
+                                align="start"
+                                side="bottom"
+                                sideOffset={4}
+                              >
+                                <Command>
+                                  <CommandInput
+                                    placeholder="Search link types..."
+                                    className="h-9"
+                                    value={linkTypeFilter}
+                                    onValueChange={setLinkTypeFilter}
+                                  />
+                                  <CommandList className="max-h-[200px] w-full overflow-y-auto scroll-auto">
+                                    <CommandEmpty>
+                                      No matching link types found.
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {getFilteredLinkTypes().map((type) => (
+                                        <CommandItem
+                                          key={type}
+                                          value={type}
+                                          onSelect={(currentValue) => {
+                                            handleLinkTypeChange(
+                                              index,
+                                              currentValue,
+                                            );
+                                            setOpenLinkTypeSelect(null);
+                                            setLinkTypeFilter("");
+                                          }}
+                                        >
+                                          <span>{type}</span>
+                                          <Check
+                                            className={cn(
+                                              "ml-auto h-4 w-4",
+                                              link.linkType === type
+                                                ? "opacity-100"
+                                                : "opacity-0",
+                                            )}
+                                          />
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+
+                            {/* Remove link button */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveLink(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
