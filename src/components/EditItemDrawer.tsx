@@ -58,6 +58,9 @@ const LINK_TYPES = [
   "1Tbps",
 ];
 
+// Network device types that can only be switched between each other
+const NETWORK_DEVICE_TYPES = ["Router", "Switch", "Firewall", "Access Point"];
+
 interface EditItemDrawerProps {
   item: InventoryItem;
   isOpen: boolean;
@@ -303,14 +306,26 @@ export function EditItemDrawer({
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {itemTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        <div className="flex items-center gap-2">
-                          {getIconForType(type.value)}
-                          <span>{type.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    {itemTypes
+                      .filter((type) => {
+                        // Check if current type is a network device
+                        const isCurrentTypeNetworkDevice =
+                          NETWORK_DEVICE_TYPES.includes(formData.type);
+                        // For network devices (Router, Switch, Firewall, Access Point), only show those types
+                        if (isCurrentTypeNetworkDevice) {
+                          return NETWORK_DEVICE_TYPES.includes(type.value);
+                        }
+                        // For non-network devices, only show non-network device types
+                        return !NETWORK_DEVICE_TYPES.includes(type.value);
+                      })
+                      .map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div className="flex items-center gap-2">
+                            {getIconForType(type.value)}
+                            <span>{type.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
