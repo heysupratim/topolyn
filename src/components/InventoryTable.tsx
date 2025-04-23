@@ -83,90 +83,95 @@ export function InventoryTable() {
 
   return (
     <div className="h-full space-y-4">
-      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <Input
-          placeholder="Search by name..."
-          value={nameFilter}
-          onChange={(e) => setNameFilter(e.target.value)}
-          className="bg-card max-w-xs"
-        />
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          {typeFilters.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearTypeFilters}
-              className="flex items-center"
-            >
-              <X className="mr-1 h-4 w-4" />
-              Clear filters
-            </Button>
-          )}
-          <Popover open={openFilterPopover} onOpenChange={setOpenFilterPopover}>
-            <PopoverTrigger asChild>
+      {items.length > 0 && (
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <Input
+            placeholder="Search by name..."
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            className="bg-card max-w-xs"
+          />
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            {typeFilters.length > 0 && (
               <Button
-                variant="outline"
-                className="bg-card flex items-center gap-2"
+                variant="ghost"
+                size="sm"
+                onClick={clearTypeFilters}
+                className="flex items-center"
               >
-                <Filter className="h-4 w-4" />
-                {typeFilters.length === 0 ? (
-                  "Filter by type"
-                ) : (
-                  <>
-                    {typeFilters.length} type{typeFilters.length > 1 ? "s" : ""}{" "}
-                    selected
-                  </>
-                )}
-                <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+                <X className="mr-1 h-4 w-4" />
+                Clear filters
               </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="p-0"
-              align="end"
-              side="bottom"
-              sideOffset={4}
+            )}
+            <Popover
+              open={openFilterPopover}
+              onOpenChange={setOpenFilterPopover}
             >
-              <Command>
-                <CommandInput
-                  placeholder="Search item types..."
-                  className="h-9"
-                  value={searchTypeQuery}
-                  onValueChange={setSearchTypeQuery}
-                />
-                <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
-                  <CommandEmpty>No item types found.</CommandEmpty>
-                  <CommandGroup>
-                    {filteredItemTypes.map((type) => {
-                      const Icon = type.icon;
-                      return (
-                        <CommandItem
-                          key={type.value}
-                          value={type.value}
-                          onSelect={() => toggleTypeFilter(type.value)}
-                          className="flex items-center"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Icon className="h-4 w-4" />
-                            {type.label}
-                          </div>
-                          <CheckIcon
-                            className={cn(
-                              "ml-auto h-4 w-4",
-                              typeFilters.includes(type.value)
-                                ? "opacity-100"
-                                : "opacity-0",
-                            )}
-                          />
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="bg-card flex items-center gap-2"
+                >
+                  <Filter className="h-4 w-4" />
+                  {typeFilters.length === 0 ? (
+                    "Filter by type"
+                  ) : (
+                    <>
+                      {typeFilters.length} type
+                      {typeFilters.length > 1 ? "s" : ""} selected
+                    </>
+                  )}
+                  <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="p-0"
+                align="end"
+                side="bottom"
+                sideOffset={4}
+              >
+                <Command>
+                  <CommandInput
+                    placeholder="Search item types..."
+                    className="h-9"
+                    value={searchTypeQuery}
+                    onValueChange={setSearchTypeQuery}
+                  />
+                  <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
+                    <CommandEmpty>No item types found.</CommandEmpty>
+                    <CommandGroup>
+                      {filteredItemTypes.map((type) => {
+                        const Icon = type.icon;
+                        return (
+                          <CommandItem
+                            key={type.value}
+                            value={type.value}
+                            onSelect={() => toggleTypeFilter(type.value)}
+                            className="flex items-center"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Icon className="h-4 w-4" />
+                              {type.label}
+                            </div>
+                            <CheckIcon
+                              className={cn(
+                                "ml-auto h-4 w-4",
+                                typeFilters.includes(type.value)
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
-      </div>
+      )}
 
       {isLoading ? (
         <div className="py-8 text-center">Loading...</div>
