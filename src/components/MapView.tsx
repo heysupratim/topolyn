@@ -103,8 +103,34 @@ const Flow: FC = () => {
     // Create a map to track node levels (how deep in the linking hierarchy)
     const nodeLevels: Record<string, number> = {};
 
-    // Find all ISP nodes first (they're at level 0)
-    const ispNodes = items.filter((item) => item.type === "ISP");
+    // Find connected nodes (with either incoming or outgoing links)
+    const connectedNodeIds = new Set<string>();
+
+    // Add nodes with outgoing links
+    items.forEach((item) => {
+      if (item.outgoingLinks && item.outgoingLinks.length > 0) {
+        connectedNodeIds.add(item.id);
+        // Also add the target nodes
+        item.outgoingLinks.forEach((link) => {
+          connectedNodeIds.add(link.targetItemId);
+        });
+      }
+    });
+
+    // Add nodes with incoming links (in case they don't have outgoing links)
+    items.forEach((item) => {
+      if (item.incomingLinks && item.incomingLinks.length > 0) {
+        connectedNodeIds.add(item.id);
+      }
+    });
+
+    // Filter items to only include connected nodes
+    const connectedItems = items.filter((item) =>
+      connectedNodeIds.has(item.id),
+    );
+
+    // Find all ISP nodes first (they're at level 0) from connected nodes
+    const ispNodes = connectedItems.filter((item) => item.type === "ISP");
     ispNodes.forEach((item) => {
       nodeLevels[item.id] = 0;
     });
@@ -113,7 +139,7 @@ const Flow: FC = () => {
     const determineNodeLevels = () => {
       let hasChanges = false;
 
-      items.forEach((item) => {
+      connectedItems.forEach((item) => {
         // If the item already has a level, check if any of its outgoing links
         // need their levels set
         if (nodeLevels[item.id] !== undefined && item.outgoingLinks) {
@@ -136,8 +162,8 @@ const Flow: FC = () => {
     // Run multiple passes until all nodes have been assigned levels
     while (determineNodeLevels()) {}
 
-    // Assign level 1 to any nodes without a level (unconnected nodes)
-    items.forEach((item) => {
+    // Assign level 1 to any connected nodes without a level
+    connectedItems.forEach((item) => {
       if (nodeLevels[item.id] === undefined) {
         nodeLevels[item.id] = 1;
       }
