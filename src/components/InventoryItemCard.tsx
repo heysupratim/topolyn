@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Server, Trash2 } from "lucide-react";
 import { itemTypes } from "@/lib/ItemTypes";
-import type { InventoryItem } from "@/context/InventoryContext";
+import type { InventoryItem, ItemLink } from "@/context/InventoryContext";
 import { useInventory } from "@/context/InventoryContext";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -22,7 +22,7 @@ interface InventoryItemCardProps {
 }
 
 export function InventoryItemCard({ item }: InventoryItemCardProps) {
-  const { deleteItem } = useInventory();
+  const { deleteItem, removeItemLink, getItemLinks } = useInventory();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -49,7 +49,26 @@ export function InventoryItemCard({ item }: InventoryItemCardProps) {
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
+
+      // First, get all links associated with this item
+      const links = await getItemLinks(item.id);
+
+      // Remove all links associated with this item
+      if (links && links.length > 0) {
+        const linkDeletionPromises = links.map(async (link: ItemLink) => {
+          await removeItemLink(item.id, link.id);
+        });
+
+        // Wait for all link deletions to complete
+        await Promise.all(linkDeletionPromises);
+        toast.success(
+          `Removed ${links.length} links associated with ${item.name}`,
+        );
+      }
+
+      // Now delete the item itself
       await deleteItem(item.id);
+      toast.success(`Successfully removed ${item.name}`);
     } catch (error) {
       console.error("Failed to delete item:", error);
       toast.error("Failed to delete item");

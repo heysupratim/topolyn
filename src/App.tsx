@@ -18,7 +18,7 @@ export default function App() {
               <Route path="map" element={<MapView />} />
             </Route>
           </Routes>
-          <Toaster position="bottom-right" />
+          <Toaster position="bottom-center" />
         </BrowserRouter>
       </InventoryProvider>
     </ThemeProvider>
