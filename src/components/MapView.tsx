@@ -100,32 +100,91 @@ const Flow: FC = () => {
 
   // Create nodes from inventory items
   const nodes: Node[] = useMemo(() => {
-    return items.map((item, index) => {
-      // Generate position based on item type and index
-      // ISP nodes at the top, others distributed in a grid-like layout
-      let position = { x: 0, y: 0 };
+    // Create a map to track node levels (how deep in the linking hierarchy)
+    const nodeLevels: Record<string, number> = {};
 
-      if (item.type === "ISP") {
-        position = { x: 0, y: -200 };
-      } else {
-        // Create a grid layout for non-ISP nodes
-        const row = Math.floor(index / 3);
-        const col = index % 3;
-        position = { x: col * 200 - 200, y: row * 150 };
-      }
-
-      return {
-        id: item.id,
-        type: "inventoryItem", // Custom node type
-        position,
-        data: {
-          label: item.name,
-          ipAddress: item.ipAddress,
-          type: item.type,
-          icon: getIconForType(item.type),
-        },
-      };
+    // Find all ISP nodes first (they're at level 0)
+    const ispNodes = items.filter((item) => item.type === "ISP");
+    ispNodes.forEach((item) => {
+      nodeLevels[item.id] = 0;
     });
+
+    // Function to determine node level based on connections
+    const determineNodeLevels = () => {
+      let hasChanges = false;
+
+      items.forEach((item) => {
+        // If the item already has a level, check if any of its outgoing links
+        // need their levels set
+        if (nodeLevels[item.id] !== undefined && item.outgoingLinks) {
+          item.outgoingLinks.forEach((link) => {
+            const targetLevel = nodeLevels[item.id] + 1;
+            if (
+              nodeLevels[link.targetItemId] === undefined ||
+              nodeLevels[link.targetItemId] > targetLevel
+            ) {
+              nodeLevels[link.targetItemId] = targetLevel;
+              hasChanges = true;
+            }
+          });
+        }
+      });
+
+      return hasChanges;
+    };
+
+    // Run multiple passes until all nodes have been assigned levels
+    while (determineNodeLevels()) {}
+
+    // Assign level 1 to any nodes without a level (unconnected nodes)
+    items.forEach((item) => {
+      if (nodeLevels[item.id] === undefined) {
+        nodeLevels[item.id] = 1;
+      }
+    });
+
+    // Group nodes by levels
+    const nodesByLevel: Record<number, string[]> = {};
+    Object.entries(nodeLevels).forEach(([id, level]) => {
+      if (!nodesByLevel[level]) {
+        nodesByLevel[level] = [];
+      }
+      nodesByLevel[level].push(id);
+    });
+
+    // Position nodes
+    const positionedNodes: Node[] = [];
+    const verticalDistance = 300; // Distance between levels in px
+
+    // Position nodes by level and in a grid within each level
+    Object.entries(nodesByLevel).forEach(([level, nodeIds]) => {
+      const levelNum = parseInt(level);
+      const totalWidth = nodeIds.length * 180; // Approx width including margins
+      const startX = -totalWidth / 2 + 90; // Center the row of nodes
+      const y = levelNum * verticalDistance;
+
+      nodeIds.forEach((nodeId, index) => {
+        const item = items.find((i) => i.id === nodeId);
+        if (item) {
+          positionedNodes.push({
+            id: item.id,
+            type: "inventoryItem", // Custom node type
+            position: {
+              x: startX + index * 180, // 180px spacing between nodes in same level
+              y: y,
+            },
+            data: {
+              label: item.name,
+              ipAddress: item.ipAddress,
+              type: item.type,
+              icon: getIconForType(item.type),
+            },
+          });
+        }
+      });
+    });
+
+    return positionedNodes;
   }, [items]);
 
   // Create edges from item links
@@ -139,7 +198,7 @@ const Flow: FC = () => {
             id: `${item.id}-${link.targetItemId}`,
             source: item.id,
             target: link.targetItemId,
-            type: "bezier", // Changed from 'smoothstep' to 'bezier' for a more natural curve
+            type: "straight", // Changed to straight lines for a cleaner look with horizontal arrangement
             style: {
               stroke: "#555",
               strokeWidth: 1.5,
@@ -157,7 +216,6 @@ const Flow: FC = () => {
               color: "#555",
             },
             label: link.linkType,
-            // Adjust the curve of the edge
             data: { linkType: link.linkType },
           });
         });
