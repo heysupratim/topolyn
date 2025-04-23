@@ -2,11 +2,10 @@ import { Button } from "@/components/ui/button";
 import ReactFlow, {
   Background,
   ReactFlowProvider,
-  ReactFlowInstance,
   useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Minus, Plus, ZoomIn } from "lucide-react";
+import { Minus, Plus, Maximize } from "lucide-react";
 import { FC } from "react";
 
 interface CustomControlsProps {
@@ -47,7 +46,7 @@ const CustomControls: FC<CustomControlsProps> = ({
         onClick={onFitView}
         className="bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
       >
-        <ZoomIn className="h-4 w-4" />
+        <Maximize className="h-4 w-4" />
         <span className="sr-only">Fit view</span>
       </Button>
     </div>
