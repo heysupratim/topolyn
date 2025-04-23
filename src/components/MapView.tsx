@@ -65,10 +65,10 @@ const CustomControls: FC<CustomControlsProps> = ({
 // Custom node component to display inventory item details
 const InventoryItemNode: FC<NodeProps> = ({ data }) => {
   return (
-    <div className="bg-card border-border w-[140px] rounded-md border p-4 shadow-sm">
+    <div className="bg-card border-border w-fit rounded-md border p-4 shadow-sm">
       <div className="flex flex-col items-center gap-2">
         <div className="bg-muted mb-1 rounded-md p-2">{data.icon}</div>
-        <div className="w-full truncate text-center text-xs font-medium">
+        <div className="w-full text-center text-xs font-medium">
           {data.label}
         </div>
         {data.ipAddress && (
@@ -81,13 +81,13 @@ const InventoryItemNode: FC<NodeProps> = ({ data }) => {
         type="source"
         position={Position.Bottom}
         id="source"
-        className="bg-primary h-2 w-2"
+        className="invisible h-2 w-2"
       />
       <Handle
         type="target"
         position={Position.Top}
         id="target"
-        className="bg-primary h-2 w-2"
+        className="invisible h-2 w-2"
       />
     </div>
   );
@@ -224,13 +224,14 @@ const Flow: FC = () => {
             id: `${item.id}-${link.targetItemId}`,
             source: item.id,
             target: link.targetItemId,
+            className: "",
             style: {
-              stroke: "#555",
-              strokeWidth: 1.5,
+              stroke: "var(--muted-foreground)",
+              strokeWidth: 1,
               opacity: 0.8,
             },
             labelStyle: {
-              fill: "#333",
+              fill: "var(--foreground)",
               fontSize: 11,
               fontWeight: "500",
             },
@@ -240,7 +241,7 @@ const Flow: FC = () => {
               type: MarkerType.Arrow,
               width: 15,
               height: 15,
-              color: "#555", // Making the marker transparent
+              color: "var(--muted-foreground)",
             },
           });
         });
