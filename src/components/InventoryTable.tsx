@@ -57,7 +57,7 @@ export function InventoryTable() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="h-full space-y-4">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <Input
           placeholder="Search by name..."
@@ -152,7 +152,7 @@ export function InventoryTable() {
           ))}
         </div>
       ) : (
-        <div className="bg-card rounded-md border py-8 text-center">
+        <div className="flex h-full items-center justify-center rounded-md border text-center">
           No inventory items found.
         </div>
       )}
