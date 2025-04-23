@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -34,15 +34,21 @@ import { toast } from "sonner";
 import { itemTypes } from "@/lib/ItemTypes";
 
 interface AddItemDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onItemAdded?: () => void;
+  preselectedType?: string | null;
+  hideIpField?: boolean;
+  isIspEntrypoint?: boolean;
 }
 
 export default function AddItemDialog({
-  open,
+  isOpen,
   onOpenChange,
   onItemAdded,
+  preselectedType = null,
+  hideIpField = false,
+  isIspEntrypoint = false,
 }: AddItemDialogProps) {
   const [itemName, setItemName] = useState("");
   const [itemType, setItemType] = useState("");
@@ -59,11 +65,18 @@ export default function AddItemDialog({
     ipAddress: "",
   });
 
+  // Set preselected type when dialog opens
+  useEffect(() => {
+    if (isOpen && preselectedType) {
+      setItemType(preselectedType);
+    }
+  }, [isOpen, preselectedType]);
+
   const validateForm = () => {
     const newErrors = {
       itemName: !itemName ? "Item name is required" : "",
       itemType: !itemType ? "Item type is required" : "",
-      ipAddress: !ipAddress ? "IP address is required" : "",
+      ipAddress: hideIpField ? "" : !ipAddress ? "IP address is required" : "",
     };
 
     setErrors(newErrors);
@@ -130,12 +143,14 @@ export default function AddItemDialog({
   const selectedType = itemTypes.find((type) => type.value === itemType);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card text-card-foreground overflow-hidden rounded-xl border p-0 shadow sm:max-w-[425px]">
         <DialogHeader className="bg-background px-6 pt-10 pb-6">
-          <DialogTitle>Add Item</DialogTitle>
+          <DialogTitle>{isIspEntrypoint ? "Add ISP" : "Add Item"}</DialogTitle>
           <DialogDescription>
-            Add a new device or service to your homelab visualization.
+            {isIspEntrypoint
+              ? "Add the entrypoint to your network"
+              : "Add a new device or service to your homelab visualization."}
           </DialogDescription>
         </DialogHeader>
         <Separator />
@@ -176,7 +191,7 @@ export default function AddItemDialog({
                 <div className="col-span-3 space-y-1">
                   <Popover
                     open={openCombobox}
-                    onOpenChange={setOpenCombobox}
+                    onOpenChange={preselectedType ? undefined : setOpenCombobox}
                     modal
                   >
                     <PopoverTrigger asChild>
@@ -189,12 +204,14 @@ export default function AddItemDialog({
                           "bg-card w-full justify-between",
                           errors.itemType &&
                             "border-destructive focus-visible:ring-destructive text-destructive",
+                          preselectedType && "pointer-events-none opacity-80",
                         )}
                         onClick={() => {
                           if (errors.itemType) {
                             setErrors((prev) => ({ ...prev, itemType: "" }));
                           }
                         }}
+                        disabled={!!preselectedType}
                       >
                         {selectedType ? (
                           <div className="flex items-center">
@@ -271,33 +288,35 @@ export default function AddItemDialog({
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="ipAddress" className="text-right">
-                  IP Address
-                </Label>
-                <div className="col-span-3 space-y-1">
-                  <Input
-                    id="ipAddress"
-                    value={ipAddress}
-                    onChange={(e) => {
-                      setIpAddress(e.target.value);
-                      if (e.target.value) {
-                        setErrors((prev) => ({ ...prev, ipAddress: "" }));
-                      }
-                    }}
-                    className={cn(
-                      errors.ipAddress &&
-                        "border-destructive focus-visible:ring-destructive",
+              {!hideIpField && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="ipAddress" className="text-right">
+                    IP Address
+                  </Label>
+                  <div className="col-span-3 space-y-1">
+                    <Input
+                      id="ipAddress"
+                      value={ipAddress}
+                      onChange={(e) => {
+                        setIpAddress(e.target.value);
+                        if (e.target.value) {
+                          setErrors((prev) => ({ ...prev, ipAddress: "" }));
+                        }
+                      }}
+                      className={cn(
+                        errors.ipAddress &&
+                          "border-destructive focus-visible:ring-destructive",
+                      )}
+                      required
+                    />
+                    {errors.ipAddress && (
+                      <p className="text-destructive text-sm">
+                        {errors.ipAddress}
+                      </p>
                     )}
-                    required
-                  />
-                  {errors.ipAddress && (
-                    <p className="text-destructive text-sm">
-                      {errors.ipAddress}
-                    </p>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <DialogFooter className="mt-6">
               <Button

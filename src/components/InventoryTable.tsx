@@ -15,17 +15,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CheckIcon, ChevronsUpDown, Filter, X } from "lucide-react";
+import { CheckIcon, ChevronsUpDown, Filter, PlusCircle, X } from "lucide-react";
 import { itemTypes } from "@/lib/ItemTypes";
 import { InventoryItemCard } from "@/components/InventoryItemCard";
 import { cn } from "@/lib/Utils";
+import AddItemDialog from "./AddItemDialog";
 
 export function InventoryTable() {
-  const { items, isLoading } = useInventory();
+  const { items, isLoading, refreshInventory } = useInventory();
   const [nameFilter, setNameFilter] = useState("");
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
   const [searchTypeQuery, setSearchTypeQuery] = useState("");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [preselectedType, setPreselectedType] = useState<string | null>(null);
+  const [hideIpField, setHideIpField] = useState(false);
 
   // Filter items by name and type
   const filteredItems = items.filter((item) => {
@@ -55,6 +59,27 @@ export function InventoryTable() {
   const filteredItemTypes = itemTypes.filter((type) =>
     type.label.toLowerCase().includes(searchTypeQuery.toLowerCase()),
   );
+
+  // Handle adding ISP node
+  const handleAddIsp = () => {
+    setPreselectedType("ISP WAN");
+    setHideIpField(true);
+    setIsAddDialogOpen(true);
+  };
+
+  // Reset add dialog settings when closed
+  const handleAddDialogOpenChange = (open: boolean) => {
+    setIsAddDialogOpen(open);
+    if (!open) {
+      setPreselectedType(null);
+      setHideIpField(false);
+    }
+  };
+
+  // Handle when item is added
+  const handleItemAdded = () => {
+    refreshInventory();
+  };
 
   return (
     <div className="h-full space-y-4">
@@ -152,10 +177,28 @@ export function InventoryTable() {
           ))}
         </div>
       ) : (
-        <div className="flex h-[calc(100%-3rem)] min-h-[200px] w-full items-center justify-center rounded-md border text-center">
-          No inventory items found.
+        <div className="flex h-[calc(100%-3rem)] min-h-[200px] w-full flex-col items-center justify-center gap-4 rounded-md border p-6 text-center">
+          <p className="text-muted-foreground text-lg">
+            Begin by adding your ISP node
+          </p>
+          <Button
+            onClick={handleAddIsp}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            <span>Add ISP Node</span>
+          </Button>
         </div>
       )}
+
+      <AddItemDialog
+        isOpen={isAddDialogOpen}
+        onOpenChange={handleAddDialogOpenChange}
+        onItemAdded={handleItemAdded}
+        preselectedType={preselectedType}
+        isIspEntrypoint={true}
+        hideIpField={hideIpField}
+      />
     </div>
   );
 }

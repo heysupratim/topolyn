@@ -10,7 +10,7 @@ import { useLocation } from "react-router-dom";
 
 export function AppHeader() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { refreshInventory } = useInventory();
+  const { refreshInventory, items } = useInventory();
   const location = useLocation();
 
   // Get the route name based on the current path
@@ -26,6 +26,9 @@ export function AppHeader() {
     refreshInventory();
   };
 
+  // Only show Add Item button if there are items in the inventory
+  const showAddButton = items.length > 0;
+
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b py-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -37,19 +40,21 @@ export function AppHeader() {
         <h1 className="text-base font-medium">{getRouteName()}</h1>
         <div className="ml-auto flex items-center gap-4">
           <ThemeToggle />
-          <Button
-            title="Quick Create"
-            variant="default"
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-          >
-            <PlusCircle />
-            <span>Add Item</span>
-          </Button>
+          {showAddButton && (
+            <Button
+              title="Quick Create"
+              variant="default"
+              onClick={() => setIsDialogOpen(true)}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+            >
+              <PlusCircle />
+              <span>Add Item</span>
+            </Button>
+          )}
         </div>
       </div>
       <AddItemDialog
-        open={isDialogOpen}
+        isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         onItemAdded={handleItemAdded}
       />
