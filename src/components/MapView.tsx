@@ -68,7 +68,7 @@ const InventoryItemNode: FC<NodeProps> = ({ data }) => {
     <div className="bg-card border-border w-[140px] rounded-md border p-4 shadow-sm">
       <div className="flex flex-col items-center gap-2">
         <div className="bg-muted mb-1 rounded-md p-2">{data.icon}</div>
-        <div className="w-full truncate text-center font-medium">
+        <div className="w-full truncate text-center text-xs font-medium">
           {data.label}
         </div>
         {data.ipAddress && (
@@ -154,12 +154,12 @@ const Flow: FC = () => {
 
     // Position nodes
     const positionedNodes: Node[] = [];
-    const verticalDistance = 300; // Distance between levels in px
+    const verticalDistance = 250; // Distance between levels in px
 
     // Position nodes by level and in a grid within each level
     Object.entries(nodesByLevel).forEach(([level, nodeIds]) => {
       const levelNum = parseInt(level);
-      const totalWidth = nodeIds.length * 180; // Approx width including margins
+      const totalWidth = nodeIds.length * 250; // Approx width including margins
       const startX = -totalWidth / 2 + 90; // Center the row of nodes
       const y = levelNum * verticalDistance;
 
@@ -170,7 +170,7 @@ const Flow: FC = () => {
             id: item.id,
             type: "inventoryItem", // Custom node type
             position: {
-              x: startX + index * 180, // 180px spacing between nodes in same level
+              x: startX + index * 250, // 200px spacing between nodes in same level (updated from 180px)
               y: y,
             },
             data: {
