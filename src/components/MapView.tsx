@@ -12,7 +12,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { Minus, Plus, Maximize } from "lucide-react";
-import { FC, useCallback, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import { getIconForType } from "@/lib/Utils";
 import { Badge } from "./ui/badge";
@@ -234,14 +234,14 @@ const Flow: FC = () => {
               fontSize: 11,
               fontWeight: "500",
             },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 15,
-              height: 15,
-              color: "#555",
-            },
             label: link.linkType,
             data: { linkType: link.linkType },
+            markerEnd: {
+              type: MarkerType.Arrow,
+              width: 15,
+              height: 15,
+              color: "#555", // Making the marker transparent
+            },
           });
         });
       }
@@ -253,11 +253,6 @@ const Flow: FC = () => {
   // Define node types for the ReactFlow component
   const nodeTypes = useMemo(() => ({ inventoryItem: InventoryItemNode }), []);
 
-  // Handle node click
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
-    console.log("Node clicked:", node);
-  }, []);
-
   // Define proOptions to hide the watermark
   const proOptions = { hideAttribution: true };
 
@@ -266,24 +261,12 @@ const Flow: FC = () => {
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
-      onNodeClick={onNodeClick}
       proOptions={proOptions}
-      defaultEdgeOptions={{
-        animated: false,
-        style: {
-          stroke: "#555",
-          strokeWidth: 1.5,
-          opacity: 0.8,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 15,
-          height: 15,
-          color: "#555",
-        },
-      }}
       className="bg-background h-full w-full rounded-md"
       fitView
+      nodesDraggable={false}
+      nodesConnectable={false}
+      elementsSelectable={false}
     >
       <Background />
       <CustomControls
