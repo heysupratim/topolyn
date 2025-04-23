@@ -231,8 +231,8 @@ const Flow: FC = () => {
               opacity: 0.8,
             },
             labelStyle: {
-              fill: "var(--foreground)",
-              fontSize: 11,
+              fill: "var(--muted-foreground)",
+              fontSize: 10,
               fontWeight: "500",
             },
             label: link.linkType,

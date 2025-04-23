@@ -253,3 +253,12 @@
     cursor: not-allowed !important;
   }
 }
+
+.react-flow__edge-textbg {
+  fill: var(--card) !important;
+  fill-opacity: 0.8;
+  stroke: var(--secondary);
+  stroke-width: 1px;
+  rx: 4px;
+  ry: 4px;
+}
