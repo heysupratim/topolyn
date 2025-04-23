@@ -5,8 +5,8 @@ import { ReactNode } from "react";
 // Animation variants for page transitions
 const pageVariants = {
   initial: {
-    opacity: 1,
-    y: "15%", // Start slightly to the right for enter, left for exit
+    opacity: 0,
+    y: "15%",
   },
   in: {
     opacity: 1,
@@ -17,8 +17,8 @@ const pageVariants = {
 // Animation transition configuration
 const pageTransition = {
   type: "spring",
-  ease: "easeIn",
-  duration: 0.75, // Quick but smooth transition
+  ease: "easeOut",
+  duration: 0.75,
 };
 
 interface AnimatedRoutesProps {
@@ -35,7 +35,6 @@ export function AnimatedRoutes({ children }: AnimatedRoutesProps) {
         key={location.pathname}
         initial="initial"
         animate="in"
-        exit="exit"
         variants={pageVariants}
         transition={pageTransition}
         className="flex w-full flex-1 flex-col"
