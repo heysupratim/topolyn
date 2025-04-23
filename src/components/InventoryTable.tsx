@@ -152,7 +152,7 @@ export function InventoryTable() {
           ))}
         </div>
       ) : (
-        <div className="flex h-full items-center justify-center rounded-md border text-center">
+        <div className="flex h-[calc(100%-3rem)] min-h-[200px] w-full items-center justify-center rounded-md border text-center">
           No inventory items found.
         </div>
       )}
