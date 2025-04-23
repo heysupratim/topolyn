@@ -11,16 +11,19 @@ import ReactFlow, {
   NodeProps,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Minus, Plus, Maximize } from "lucide-react";
-import { FC, useMemo } from "react";
+import { Minus, Plus, Maximize, Wrench } from "lucide-react";
+import { FC, useMemo, useState } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import { getIconForType } from "@/lib/Utils";
 import { Badge } from "./ui/badge";
+import { Slider } from "./ui/slider";
+import { Label } from "./ui/label";
 
 interface CustomControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onFitView: () => void;
+  onCustomize: () => void;
 }
 
 // Custom controls using shadcn UI components
@@ -28,6 +31,7 @@ const CustomControls: FC<CustomControlsProps> = ({
   onZoomIn,
   onZoomOut,
   onFitView,
+  onCustomize,
 }) => {
   return (
     <div className="bg-background absolute right-4 bottom-4 z-50 flex flex-col gap-2 rounded-md border p-1 shadow-sm">
@@ -58,6 +62,80 @@ const CustomControls: FC<CustomControlsProps> = ({
         <Maximize className="h-4 w-4" />
         <span className="sr-only">Fit view</span>
       </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onCustomize}
+        className="bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+      >
+        <Wrench className="h-4 w-4" />
+        <span className="sr-only">Customize</span>
+      </Button>
+    </div>
+  );
+};
+
+// Customization panel component
+interface CustomizationPanelProps {
+  horizontalDistance: number;
+  verticalDistance: number;
+  onHorizontalDistanceChange: (value: number[]) => void;
+  onVerticalDistanceChange: (value: number[]) => void;
+  isOpen: boolean;
+}
+
+const CustomizationPanel: FC<CustomizationPanelProps> = ({
+  horizontalDistance,
+  verticalDistance,
+  onHorizontalDistanceChange,
+  onVerticalDistanceChange,
+  isOpen,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="bg-card border-border absolute bottom-4 left-4 z-50 flex flex-col gap-4 rounded-md border p-4 shadow-md">
+      <h3 className="text-foreground font-medium">Layout Customization</h3>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="horizontal-distance" className="text-sm">
+            Horizontal Distance
+          </Label>
+          <span className="text-muted-foreground text-xs">
+            {horizontalDistance}px
+          </span>
+        </div>
+        <Slider
+          id="horizontal-distance"
+          min={100}
+          max={400}
+          step={10}
+          value={[horizontalDistance]}
+          onValueChange={onHorizontalDistanceChange}
+          className="w-48"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="vertical-distance" className="text-sm">
+            Vertical Distance
+          </Label>
+          <span className="text-muted-foreground text-xs">
+            {verticalDistance}px
+          </span>
+        </div>
+        <Slider
+          id="vertical-distance"
+          min={100}
+          max={400}
+          step={10}
+          value={[verticalDistance]}
+          onValueChange={onVerticalDistanceChange}
+          className="w-48"
+        />
+      </div>
     </div>
   );
 };
@@ -97,6 +175,24 @@ const InventoryItemNode: FC<NodeProps> = ({ data }) => {
 const Flow: FC = () => {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { items } = useInventory();
+
+  const [isCustomizationPanelOpen, setIsCustomizationPanelOpen] =
+    useState(false);
+  const [horizontalDistance, setHorizontalDistance] = useState(250);
+  const [verticalDistance, setVerticalDistance] = useState(250);
+
+  // Handle distance changes
+  const handleHorizontalDistanceChange = (value: number[]) => {
+    setHorizontalDistance(value[0]);
+    // Small delay to ensure nodes are repositioned before fitting view
+    setTimeout(() => fitView({ padding: 0.2 }), 50);
+  };
+
+  const handleVerticalDistanceChange = (value: number[]) => {
+    setVerticalDistance(value[0]);
+    // Small delay to ensure nodes are repositioned before fitting view
+    setTimeout(() => fitView({ padding: 0.2 }), 50);
+  };
 
   // Create nodes from inventory items
   const nodes: Node[] = useMemo(() => {
@@ -180,12 +276,11 @@ const Flow: FC = () => {
 
     // Position nodes
     const positionedNodes: Node[] = [];
-    const verticalDistance = 250; // Distance between levels in px
 
     // Position nodes by level and in a grid within each level
     Object.entries(nodesByLevel).forEach(([level, nodeIds]) => {
       const levelNum = parseInt(level);
-      const totalWidth = nodeIds.length * 250; // Approx width including margins
+      const totalWidth = nodeIds.length * horizontalDistance; // Approx width including margins
       const startX = -totalWidth / 2 + 90; // Center the row of nodes
       const y = levelNum * verticalDistance;
 
@@ -194,9 +289,9 @@ const Flow: FC = () => {
         if (item) {
           positionedNodes.push({
             id: item.id,
-            type: "inventoryItem", // Custom node type
+            type: "inventoryItem",
             position: {
-              x: startX + index * 250, // 200px spacing between nodes in same level (updated from 180px)
+              x: startX + index * horizontalDistance,
               y: y,
             },
             data: {
@@ -211,7 +306,7 @@ const Flow: FC = () => {
     });
 
     return positionedNodes;
-  }, [items]);
+  }, [items, horizontalDistance, verticalDistance]);
 
   // Create edges from item links
   const edges: Edge[] = useMemo(() => {
@@ -274,6 +369,16 @@ const Flow: FC = () => {
         onZoomIn={() => zoomIn()}
         onZoomOut={() => zoomOut()}
         onFitView={() => fitView()}
+        onCustomize={() =>
+          setIsCustomizationPanelOpen(!isCustomizationPanelOpen)
+        }
+      />
+      <CustomizationPanel
+        horizontalDistance={horizontalDistance}
+        verticalDistance={verticalDistance}
+        onHorizontalDistanceChange={handleHorizontalDistanceChange}
+        onVerticalDistanceChange={handleVerticalDistanceChange}
+        isOpen={isCustomizationPanelOpen}
       />
     </ReactFlow>
   );
