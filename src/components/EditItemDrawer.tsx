@@ -301,8 +301,18 @@ export function EditItemDrawer({
 
               <div className="space-y-2">
                 <Label htmlFor="type">Type</Label>
-                <Select value={formData.type} onValueChange={handleTypeChange}>
-                  <SelectTrigger>
+                <Select
+                  value={formData.type}
+                  onValueChange={handleTypeChange}
+                  disabled={formData.type === "ISP"} // Disable select when type is ISP
+                >
+                  <SelectTrigger
+                    className={
+                      formData.type === "ISP"
+                        ? "cursor-not-allowed opacity-60"
+                        : ""
+                    }
+                  >
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
                   <SelectContent>
