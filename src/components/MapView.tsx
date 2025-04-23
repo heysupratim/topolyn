@@ -198,7 +198,6 @@ const Flow: FC = () => {
             id: `${item.id}-${link.targetItemId}`,
             source: item.id,
             target: link.targetItemId,
-            type: "straight", // Changed to straight lines for a cleaner look with horizontal arrangement
             style: {
               stroke: "#555",
               strokeWidth: 1.5,
@@ -244,7 +243,6 @@ const Flow: FC = () => {
       onNodeClick={onNodeClick}
       proOptions={proOptions}
       defaultEdgeOptions={{
-        type: "bezier",
         animated: false,
         style: {
           stroke: "#555",
