@@ -228,9 +228,17 @@ export function EditItemDrawer({
     }
   };
 
-  // Check if the current item is a router or switch
+  // Check if the current item is a router, switch or ISP
   const isNetworkDevice =
-    formData.type === "Router" || formData.type === "Switch";
+    formData.type === "Router" ||
+    formData.type === "Switch" ||
+    formData.type === "ISP";
+
+  // Determine if we should show the add link button based on the item type:
+  // For ISP: Only show if there are no links
+  // For Router/Switch: Always show
+  const shouldShowAddLinkButton =
+    formData.type === "ISP" ? itemLinks.length === 0 : isNetworkDevice;
 
   // Filter out the current item from available items to link
   // Also filter out items that are already selected
@@ -318,26 +326,29 @@ export function EditItemDrawer({
                 />
               </div>
 
-              {/* Link Nodes Section - Only show for Router and Switch types */}
+              {/* Link Nodes Section - Show for all network devices */}
               {isNetworkDevice && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <Label>Linked Items</Label>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleAddLink}
-                      className="flex items-center gap-1"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      <span>Add</span>
-                    </Button>
+                    {shouldShowAddLinkButton && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleAddLink}
+                        className="flex items-center gap-1"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>Add</span>
+                      </Button>
+                    )}
                   </div>
 
                   {itemLinks.length === 0 ? (
                     <div className="text-muted-foreground py-2 text-sm">
-                      No links added. Click "Add Link" to connect this device to
-                      other items.
+                      {formData.type === "ISP"
+                        ? 'No links added. Click "Add Link" to connect this ISP node to another item.'
+                        : 'No links added. Click "Add Link" to connect this device to other items.'}
                     </div>
                   ) : (
                     <div className="space-y-2">

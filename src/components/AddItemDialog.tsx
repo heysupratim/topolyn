@@ -135,9 +135,11 @@ export default function AddItemDialog({
   };
 
   // Filter item types based on search query
-  const filteredItemTypes = itemTypes.filter((type) =>
-    type.label.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredItemTypes = itemTypes
+    .filter((type) =>
+      type.label.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+    .filter((type) => isIspEntrypoint || type.value !== "ISP");
 
   // Get the selected item type object
   const selectedType = itemTypes.find((type) => type.value === itemType);

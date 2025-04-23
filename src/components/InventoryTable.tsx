@@ -62,7 +62,7 @@ export function InventoryTable() {
 
   // Handle adding ISP node
   const handleAddIsp = () => {
-    setPreselectedType("ISP WAN");
+    setPreselectedType("ISP");
     setHideIpField(true);
     setIsAddDialogOpen(true);
   };

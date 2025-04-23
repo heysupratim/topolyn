@@ -36,5 +36,5 @@ export const itemTypes: ItemType[] = [
   { value: "Rack Server", label: "Rack Server", icon: ServerCrash },
   { value: "VPS", label: "VPS", icon: Cloud },
   { value: "Cloud Compute", label: "Cloud Compute", icon: CloudCog },
-  { value: "ISP WAN", label: "ISP WAN", icon: Globe },
+  { value: "ISP", label: "ISP", icon: Globe },
 ];
