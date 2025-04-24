@@ -273,8 +273,8 @@ const Flow: FC = () => {
   // Use the extracted node generation logic
   const { nodes, edges } = useMapNodes({
     items,
-    horizontalDistance,
-    verticalDistance,
+    horizontalDistance: isVertical ? horizontalDistance : verticalDistance,
+    verticalDistance: isVertical ? verticalDistance : horizontalDistance,
     nodeWidth,
     nodeHeight,
     isVertical,
