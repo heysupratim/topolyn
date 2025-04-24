@@ -327,38 +327,141 @@ const Flow: FC = () => {
       nodesByLevel[level].push(id);
     });
 
+    // Create a mapping of parents to their children
+    const parentToChildren: Record<string, string[]> = {};
+
+    // Map each child to its parent(s)
+    items.forEach((item) => {
+      if (item.outgoingLinks) {
+        item.outgoingLinks.forEach((link) => {
+          if (!parentToChildren[item.id]) {
+            parentToChildren[item.id] = [];
+          }
+          parentToChildren[item.id].push(link.targetItemId);
+        });
+      }
+    });
+
+    // Create a mapping to store the x-position of each node
+    const nodePositions: Record<string, { x: number; y: number }> = {};
+
     // Position nodes
     const positionedNodes: Node[] = [];
 
-    // Position nodes by level and in a grid within each level
-    Object.entries(nodesByLevel).forEach(([level, nodeIds]) => {
-      const levelNum = parseInt(level);
+    // First position the top level nodes (level 0, typically ISPs)
+    if (nodesByLevel[0]) {
+      const levelZeroNodes = nodesByLevel[0];
       const totalWidth =
-        nodeIds.length * nodeWidth + (nodeIds.length - 1) * horizontalDistance; // Approx width including margins
-      const startX = -totalWidth / 2; // Center the row of nodes
-      const y = levelNum * (verticalDistance + nodeHeight);
+        levelZeroNodes.length * nodeWidth +
+        (levelZeroNodes.length - 1) * horizontalDistance;
+      const startX = -totalWidth / 2; // Center the first level nodes
 
-      nodeIds.forEach((nodeId, index) => {
-        const item = items.find((i) => i.id === nodeId);
-        if (item) {
-          positionedNodes.push({
-            id: item.id,
-            type: "inventoryItem",
-            position: {
-              x: startX + index * nodeWidth + index * horizontalDistance,
-              y: y,
-            },
-            data: {
-              label: item.name,
-              ipAddress: item.ipAddress,
-              type: item.type,
-              icon: getIconForType(item.type),
-              width: nodeWidth,
-              height: nodeHeight,
-            },
+      levelZeroNodes.forEach((nodeId, index) => {
+        const xPos = startX + index * (nodeWidth + horizontalDistance);
+        nodePositions[nodeId] = {
+          x: xPos,
+          y: 0,
+        };
+      });
+    }
+
+    // Then position the rest of the levels, aligning children with parents
+    const processedLevels = nodesByLevel[0] ? [0] : [];
+
+    // Process remaining levels in order
+    const remainingLevels = Object.keys(nodesByLevel)
+      .map(Number)
+      .filter((level) => !processedLevels.includes(level))
+      .sort((a, b) => a - b);
+
+    remainingLevels.forEach((level) => {
+      const levelNodes = nodesByLevel[level];
+
+      // Group children by their parents to position them together
+      const childrenByParent: Record<string, string[]> = {};
+
+      // Find parents for each node at this level
+      levelNodes.forEach((nodeId) => {
+        let foundParent = false;
+
+        // Check if this node has a parent from previous levels
+        items.forEach((item) => {
+          if (item.outgoingLinks) {
+            item.outgoingLinks.forEach((link) => {
+              if (link.targetItemId === nodeId && nodeLevels[item.id] < level) {
+                const parentId = item.id;
+                if (!childrenByParent[parentId]) {
+                  childrenByParent[parentId] = [];
+                }
+                childrenByParent[parentId].push(nodeId);
+                foundParent = true;
+              }
+            });
+          }
+        });
+
+        // If no parent found, treat as orphan node
+        if (!foundParent) {
+          if (!childrenByParent["orphans"]) {
+            childrenByParent["orphans"] = [];
+          }
+          childrenByParent["orphans"].push(nodeId);
+        }
+      });
+
+      // Position children based on their parents
+      Object.entries(childrenByParent).forEach(([parentId, children]) => {
+        if (parentId === "orphans") {
+          // Position orphan nodes centered at this level
+          const totalWidth =
+            children.length * nodeWidth +
+            (children.length - 1) * horizontalDistance;
+          const startX = -totalWidth / 2;
+
+          children.forEach((nodeId, index) => {
+            const xPos = startX + index * (nodeWidth + horizontalDistance);
+            nodePositions[nodeId] = {
+              x: xPos,
+              y: level * (verticalDistance + nodeHeight),
+            };
+          });
+        } else {
+          // Position children underneath their parent
+          const parentXPos = nodePositions[parentId]?.x || 0;
+          const totalWidth =
+            children.length * nodeWidth +
+            (children.length - 1) * horizontalDistance;
+          const startX = parentXPos - totalWidth / 2 + nodeWidth / 2;
+
+          children.forEach((nodeId, index) => {
+            const xPos = startX + index * (nodeWidth + horizontalDistance);
+            nodePositions[nodeId] = {
+              x: xPos,
+              y: level * (verticalDistance + nodeHeight),
+            };
           });
         }
       });
+    });
+
+    // Create the actual node objects using calculated positions
+    items.forEach((item) => {
+      if (nodePositions[item.id]) {
+        const { x, y } = nodePositions[item.id];
+        positionedNodes.push({
+          id: item.id,
+          type: "inventoryItem",
+          position: { x, y },
+          data: {
+            label: item.name,
+            ipAddress: item.ipAddress,
+            type: item.type,
+            icon: getIconForType(item.type),
+            width: nodeWidth,
+            height: nodeHeight,
+          },
+        });
+      }
     });
 
     return positionedNodes;
