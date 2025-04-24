@@ -255,6 +255,10 @@ const Flow: FC = () => {
   // Toggle layout direction
   const toggleDirection = () => {
     setIsVertical(!isVertical);
+    // Add a slight delay before fitting view to allow the layout to update
+    setTimeout(() => {
+      fitView({ padding: 0.1, duration: 750 });
+    }, 100);
   };
 
   // Handle node click
