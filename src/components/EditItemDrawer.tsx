@@ -618,6 +618,19 @@ export function EditItemDrawer({
               </div>
             </div>
           </div>
+
+          {/* Delete link positioned right above footer */}
+          <div className="flex justify-center pb-2">
+            <Button
+              variant="link"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="text-destructive hover:text-destructive/80 flex items-center gap-1.5"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete this item
+            </Button>
+          </div>
+
           <DrawerFooter className="bg-card sticky bottom-0 mt-auto border-t">
             <Button onClick={handleSave} disabled={isUpdating}>
               {isUpdating ? "Saving..." : "Save changes"}
@@ -625,14 +638,6 @@ export function EditItemDrawer({
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
             </DrawerClose>
-            <Button
-              variant="destructive"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              className="mt-2 flex items-center gap-2"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete Item
-            </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
