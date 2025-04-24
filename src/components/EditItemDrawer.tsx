@@ -226,7 +226,7 @@ export function EditItemDrawer({
   // Filter out the current item from available items to link
   // When item is ISP: only show network devices
   // Also filter out items that are already selected and ISP nodes
-  // And filter out items that already have any links (incoming or outgoing)
+  // But allow previously linked items that have been removed to appear again
   const getAvailableItems = (currentIndex: number) => {
     return items
       .filter(
@@ -240,11 +240,20 @@ export function EditItemDrawer({
           (formData.type === "ISP"
             ? NETWORK_DEVICE_TYPES.includes(i.type)
             : true) &&
-          // Exclude items that already have any links (except the current link being edited)
+          // Only exclude items that have incoming links from OTHER items
+          // Items with links from the current item should be available if they're not in the current itemLinks
           !(
             i.incomingLinks &&
-            i.incomingLinks?.length > 0 &&
-            !itemLinks.some((link) => link.targetItemId === i.id)
+            i.incomingLinks.some(
+              (link) =>
+                // If the link is NOT from the current item OR
+                // if it IS from the current item but still present in itemLinks, filter it out
+                link.sourceItemId !== formData.id ||
+                (link.sourceItemId === formData.id &&
+                  itemLinks.some(
+                    (currentLink) => currentLink.targetItemId === i.id,
+                  )),
+            )
           ),
       )
       .filter(
