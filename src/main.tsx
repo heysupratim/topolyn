@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
@@ -18,11 +17,7 @@ const initApp = async () => {
     // We don't prevent app launch, as the backend might be setting up the database
   } finally {
     // Render the app regardless of database status
-    createRoot(document.getElementById("root")!).render(
-      <StrictMode>
-        <App />
-      </StrictMode>,
-    );
+    createRoot(document.getElementById("root")!).render(<App />);
   }
 };
 
