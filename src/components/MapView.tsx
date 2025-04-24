@@ -5,7 +5,7 @@ import ReactFlow, {
   useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Minus, Plus, Maximize, Wrench } from "lucide-react";
+import { Minus, Plus, Maximize, Wrench, X } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import { Slider } from "./ui/slider";
@@ -80,6 +80,7 @@ interface CustomizationPanelProps {
   onNodeWidthChange: (value: number[]) => void;
   onNodeHeightChange: (value: number[]) => void;
   isOpen: boolean;
+  onClose: () => void;
 }
 
 const CustomizationPanel: FC<CustomizationPanelProps> = ({
@@ -92,12 +93,24 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
   onNodeWidthChange,
   onNodeHeightChange,
   isOpen,
+  onClose,
 }) => {
   if (!isOpen) return null;
 
   return (
     <div className="bg-card border-border absolute bottom-4 left-4 z-50 flex flex-col gap-4 rounded-md border p-4 shadow-md">
-      <h3 className="text-foreground font-medium">Layout Customization</h3>
+      <div className="flex items-center justify-between gap-8">
+        <h3 className="text-foreground font-medium">Layout Customization</h3>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="bg-background hover:bg-accent hover:text-accent-foreground h-6 w-6"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
+      </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -253,6 +266,7 @@ const Flow: FC = () => {
         onNodeWidthChange={handleNodeWidthChange}
         onNodeHeightChange={handleNodeHeightChange}
         isOpen={isCustomizationPanelOpen}
+        onClose={() => setIsCustomizationPanelOpen(false)}
       />
     </ReactFlow>
   );
