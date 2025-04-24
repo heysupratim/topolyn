@@ -79,16 +79,20 @@ const CustomControls: FC<CustomControlsProps> = ({
 interface CustomizationPanelProps {
   horizontalDistance: number;
   verticalDistance: number;
+  nodeWidth: number;
   onHorizontalDistanceChange: (value: number[]) => void;
   onVerticalDistanceChange: (value: number[]) => void;
+  onNodeWidthChange: (value: number[]) => void;
   isOpen: boolean;
 }
 
 const CustomizationPanel: FC<CustomizationPanelProps> = ({
   horizontalDistance,
   verticalDistance,
+  nodeWidth,
   onHorizontalDistanceChange,
   onVerticalDistanceChange,
+  onNodeWidthChange,
   isOpen,
 }) => {
   if (!isOpen) return null;
@@ -108,7 +112,7 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
         </div>
         <Slider
           id="horizontal-distance"
-          min={100}
+          min={0}
           max={400}
           step={10}
           value={[horizontalDistance]}
@@ -128,11 +132,29 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
         </div>
         <Slider
           id="vertical-distance"
-          min={100}
+          min={0}
           max={400}
           step={10}
           value={[verticalDistance]}
           onValueChange={onVerticalDistanceChange}
+          className="w-48"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="node-width" className="text-sm">
+            Node Width
+          </Label>
+          <span className="text-muted-foreground text-xs">{nodeWidth}px</span>
+        </div>
+        <Slider
+          id="node-width"
+          min={0}
+          max={400}
+          step={10}
+          value={[nodeWidth]}
+          onValueChange={onNodeWidthChange}
           className="w-48"
         />
       </div>
@@ -143,10 +165,13 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
 // Custom node component to display inventory item details
 const InventoryItemNode: FC<NodeProps> = ({ data }) => {
   return (
-    <div className="bg-card border-border w-fit rounded-md border p-4 shadow-sm">
+    <div
+      className="bg-card border-border rounded-md border p-4 shadow-sm"
+      style={{ width: `${data.width}px` }}
+    >
       <div className="flex flex-col items-center gap-2">
         <div className="bg-muted mb-1 rounded-md p-2">{data.icon}</div>
-        <div className="w-full text-center text-xs font-medium">
+        <div className="w-full truncate text-center text-xs font-medium">
           {data.label}
         </div>
         {data.ipAddress && (
@@ -180,6 +205,7 @@ const Flow: FC = () => {
     useState(false);
   const [horizontalDistance, setHorizontalDistance] = useState(250);
   const [verticalDistance, setVerticalDistance] = useState(250);
+  const [nodeWidth, setNodeWidth] = useState(250);
 
   // Handle distance changes
   const handleHorizontalDistanceChange = (value: number[]) => {
@@ -192,6 +218,10 @@ const Flow: FC = () => {
     setVerticalDistance(value[0]);
     // Small delay to ensure nodes are repositioned before fitting view
     setTimeout(() => fitView({ padding: 0.2 }), 50);
+  };
+
+  const handleNodeWidthChange = (value: number[]) => {
+    setNodeWidth(value[0]);
   };
 
   // Create nodes from inventory items
@@ -280,8 +310,9 @@ const Flow: FC = () => {
     // Position nodes by level and in a grid within each level
     Object.entries(nodesByLevel).forEach(([level, nodeIds]) => {
       const levelNum = parseInt(level);
-      const totalWidth = nodeIds.length * horizontalDistance; // Approx width including margins
-      const startX = -totalWidth / 2 + 90; // Center the row of nodes
+      const totalWidth =
+        nodeIds.length * nodeWidth + (nodeIds.length - 1) * horizontalDistance; // Approx width including margins
+      const startX = -totalWidth / 2; // Center the row of nodes
       const y = levelNum * verticalDistance;
 
       nodeIds.forEach((nodeId, index) => {
@@ -291,7 +322,7 @@ const Flow: FC = () => {
             id: item.id,
             type: "inventoryItem",
             position: {
-              x: startX + index * horizontalDistance,
+              x: startX + index * nodeWidth + index * horizontalDistance,
               y: y,
             },
             data: {
@@ -299,6 +330,7 @@ const Flow: FC = () => {
               ipAddress: item.ipAddress,
               type: item.type,
               icon: getIconForType(item.type),
+              width: nodeWidth,
             },
           });
         }
@@ -306,7 +338,7 @@ const Flow: FC = () => {
     });
 
     return positionedNodes;
-  }, [items, horizontalDistance, verticalDistance]);
+  }, [items, horizontalDistance, verticalDistance, nodeWidth]);
 
   // Create edges from item links
   const edges: Edge[] = useMemo(() => {
@@ -376,8 +408,10 @@ const Flow: FC = () => {
       <CustomizationPanel
         horizontalDistance={horizontalDistance}
         verticalDistance={verticalDistance}
+        nodeWidth={nodeWidth}
         onHorizontalDistanceChange={handleHorizontalDistanceChange}
         onVerticalDistanceChange={handleVerticalDistanceChange}
+        onNodeWidthChange={handleNodeWidthChange}
         isOpen={isCustomizationPanelOpen}
       />
     </ReactFlow>
