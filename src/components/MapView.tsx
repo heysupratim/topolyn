@@ -80,9 +80,11 @@ interface CustomizationPanelProps {
   horizontalDistance: number;
   verticalDistance: number;
   nodeWidth: number;
+  nodeHeight: number;
   onHorizontalDistanceChange: (value: number[]) => void;
   onVerticalDistanceChange: (value: number[]) => void;
   onNodeWidthChange: (value: number[]) => void;
+  onNodeHeightChange: (value: number[]) => void;
   isOpen: boolean;
 }
 
@@ -90,9 +92,11 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
   horizontalDistance,
   verticalDistance,
   nodeWidth,
+  nodeHeight,
   onHorizontalDistanceChange,
   onVerticalDistanceChange,
   onNodeWidthChange,
+  onNodeHeightChange,
   isOpen,
 }) => {
   if (!isOpen) return null;
@@ -112,7 +116,7 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
         </div>
         <Slider
           id="horizontal-distance"
-          min={0}
+          min={40}
           max={400}
           step={10}
           value={[horizontalDistance]}
@@ -132,7 +136,7 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
         </div>
         <Slider
           id="vertical-distance"
-          min={0}
+          min={80}
           max={400}
           step={10}
           value={[verticalDistance]}
@@ -150,11 +154,29 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
         </div>
         <Slider
           id="node-width"
-          min={0}
+          min={150}
           max={400}
           step={10}
           value={[nodeWidth]}
           onValueChange={onNodeWidthChange}
+          className="w-48"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="node-height" className="text-sm">
+            Node Height
+          </Label>
+          <span className="text-muted-foreground text-xs">{nodeHeight}px</span>
+        </div>
+        <Slider
+          id="node-height"
+          min={120}
+          max={400}
+          step={10}
+          value={[nodeHeight]}
+          onValueChange={onNodeHeightChange}
           className="w-48"
         />
       </div>
@@ -167,7 +189,7 @@ const InventoryItemNode: FC<NodeProps> = ({ data }) => {
   return (
     <div
       className="bg-card border-border rounded-md border p-4 shadow-sm"
-      style={{ width: `${data.width}px` }}
+      style={{ width: `${data.width}px`, height: `${data.height}px` }}
     >
       <div className="flex flex-col items-center gap-2">
         <div className="bg-muted mb-1 rounded-md p-2">{data.icon}</div>
@@ -203,9 +225,10 @@ const Flow: FC = () => {
 
   const [isCustomizationPanelOpen, setIsCustomizationPanelOpen] =
     useState(false);
-  const [horizontalDistance, setHorizontalDistance] = useState(250);
-  const [verticalDistance, setVerticalDistance] = useState(250);
-  const [nodeWidth, setNodeWidth] = useState(250);
+  const [horizontalDistance, setHorizontalDistance] = useState(40);
+  const [verticalDistance, setVerticalDistance] = useState(80);
+  const [nodeWidth, setNodeWidth] = useState(150);
+  const [nodeHeight, setNodeHeight] = useState(120);
 
   // Handle distance changes
   const handleHorizontalDistanceChange = (value: number[]) => {
@@ -222,6 +245,10 @@ const Flow: FC = () => {
 
   const handleNodeWidthChange = (value: number[]) => {
     setNodeWidth(value[0]);
+  };
+
+  const handleNodeHeightChange = (value: number[]) => {
+    setNodeHeight(value[0]);
   };
 
   // Create nodes from inventory items
@@ -313,7 +340,7 @@ const Flow: FC = () => {
       const totalWidth =
         nodeIds.length * nodeWidth + (nodeIds.length - 1) * horizontalDistance; // Approx width including margins
       const startX = -totalWidth / 2; // Center the row of nodes
-      const y = levelNum * verticalDistance;
+      const y = levelNum * (verticalDistance + nodeHeight);
 
       nodeIds.forEach((nodeId, index) => {
         const item = items.find((i) => i.id === nodeId);
@@ -331,6 +358,7 @@ const Flow: FC = () => {
               type: item.type,
               icon: getIconForType(item.type),
               width: nodeWidth,
+              height: nodeHeight,
             },
           });
         }
@@ -338,7 +366,7 @@ const Flow: FC = () => {
     });
 
     return positionedNodes;
-  }, [items, horizontalDistance, verticalDistance, nodeWidth]);
+  }, [items, horizontalDistance, verticalDistance, nodeWidth, nodeHeight]);
 
   // Create edges from item links
   const edges: Edge[] = useMemo(() => {
@@ -409,9 +437,11 @@ const Flow: FC = () => {
         horizontalDistance={horizontalDistance}
         verticalDistance={verticalDistance}
         nodeWidth={nodeWidth}
+        nodeHeight={nodeHeight}
         onHorizontalDistanceChange={handleHorizontalDistanceChange}
         onVerticalDistanceChange={handleVerticalDistanceChange}
         onNodeWidthChange={handleNodeWidthChange}
+        onNodeHeightChange={handleNodeHeightChange}
         isOpen={isCustomizationPanelOpen}
       />
     </ReactFlow>
