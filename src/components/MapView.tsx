@@ -30,12 +30,12 @@ const CustomControls: FC<CustomControlsProps> = ({
   onCustomize,
 }) => {
   return (
-    <div className="bg-background absolute right-4 bottom-4 z-50 flex flex-col gap-2 rounded-md border p-1 shadow-sm">
+    <div className="bg-card absolute right-4 bottom-4 z-50 flex flex-col gap-2 rounded-md border p-1 shadow-sm">
       <Button
         variant="ghost"
         size="icon"
         onClick={onZoomIn}
-        className="bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
       >
         <Plus className="h-4 w-4" />
         <span className="sr-only">Zoom in</span>
@@ -44,7 +44,7 @@ const CustomControls: FC<CustomControlsProps> = ({
         variant="ghost"
         size="icon"
         onClick={onZoomOut}
-        className="bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
       >
         <Minus className="h-4 w-4" />
         <span className="sr-only">Zoom out</span>
@@ -53,7 +53,7 @@ const CustomControls: FC<CustomControlsProps> = ({
         variant="ghost"
         size="icon"
         onClick={onFitView}
-        className="bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
       >
         <Maximize className="h-4 w-4" />
         <span className="sr-only">Fit view</span>
@@ -62,7 +62,7 @@ const CustomControls: FC<CustomControlsProps> = ({
         variant="ghost"
         size="icon"
         onClick={onCustomize}
-        className="bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
       >
         <Wrench className="h-4 w-4" />
         <span className="sr-only">Customize</span>
