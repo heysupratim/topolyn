@@ -374,6 +374,102 @@ const Flow: FC = () => {
       .filter((level) => !processedLevels.includes(level))
       .sort((a, b) => a - b);
 
+    // Create a reverse mapping of children to parents for ancestor adjustments
+    const childToParents: Record<string, string[]> = {};
+    items.forEach((item) => {
+      if (item.outgoingLinks) {
+        item.outgoingLinks.forEach((link) => {
+          if (!childToParents[link.targetItemId]) {
+            childToParents[link.targetItemId] = [];
+          }
+          childToParents[link.targetItemId].push(item.id);
+        });
+      }
+    });
+
+    // Function to check if two nodes overlap
+    const nodesOverlap = (node1Id: string, node2Id: string) => {
+      const node1Pos = nodePositions[node1Id];
+      const node2Pos = nodePositions[node2Id];
+
+      if (!node1Pos || !node2Pos) return false;
+
+      const node1Left = node1Pos.x;
+      const node1Right = node1Pos.x + nodeWidth;
+      const node2Left = node2Pos.x;
+      const node2Right = node2Pos.x + nodeWidth;
+
+      // Check horizontal overlap with a small buffer
+      const buffer = 10; // Extra buffer space to ensure visual separation
+      return node1Right + buffer > node2Left && node1Left - buffer < node2Right;
+    };
+
+    // Function to recursively adjust ancestor positions
+    const adjustAncestorPositions = (
+      nodeId: string,
+      moveDistance: number,
+      processedNodes = new Set<string>(),
+    ) => {
+      if (processedNodes.has(nodeId)) return;
+      processedNodes.add(nodeId);
+
+      // Adjust this node's position
+      if (nodePositions[nodeId]) {
+        nodePositions[nodeId].x += moveDistance;
+      }
+
+      // Adjust all children positions to maintain parent-child alignment
+      if (parentToChildren[nodeId]) {
+        parentToChildren[nodeId].forEach((childId) => {
+          if (nodePositions[childId]) {
+            nodePositions[childId].x += moveDistance;
+
+            // Also adjust any children of this child recursively
+            if (parentToChildren[childId]) {
+              adjustAncestorPositions(childId, moveDistance, processedNodes);
+            }
+          }
+        });
+      }
+
+      // Adjust all parents' positions (if needed for balance)
+      if (childToParents[nodeId]) {
+        childToParents[nodeId].forEach((parentId) => {
+          // Only adjust parent if all its children have been processed
+          const allChildrenProcessed =
+            parentToChildren[parentId]?.every((id) => processedNodes.has(id)) ??
+            true;
+          if (allChildrenProcessed) {
+            // Recenter parent over its children
+            const childrenIds = parentToChildren[parentId] || [];
+            if (
+              childrenIds.length > 0 &&
+              childrenIds.every((id) => nodePositions[id])
+            ) {
+              const childLeftmost = Math.min(
+                ...childrenIds.map((id) => nodePositions[id].x),
+              );
+              const childRightmost = Math.max(
+                ...childrenIds.map((id) => nodePositions[id].x + nodeWidth),
+              );
+              const centerPoint =
+                childLeftmost + (childRightmost - childLeftmost) / 2;
+              const parentCenter = nodePositions[parentId].x + nodeWidth / 2;
+              const delta = centerPoint - parentCenter;
+
+              if (Math.abs(delta) > 5) {
+                // Only adjust if the difference is significant
+                nodePositions[parentId].x += delta;
+
+                // Continue adjustment up the ancestor chain
+                adjustAncestorPositions(parentId, 0, processedNodes);
+              }
+            }
+          }
+        });
+      }
+    };
+
     remainingLevels.forEach((level) => {
       const levelNodes = nodesByLevel[level];
 
@@ -409,7 +505,7 @@ const Flow: FC = () => {
         }
       });
 
-      // Position children based on their parents
+      // Initial positioning of children based on their parents
       Object.entries(childrenByParent).forEach(([parentId, children]) => {
         if (parentId === "orphans") {
           // Position orphan nodes centered at this level
@@ -440,6 +536,42 @@ const Flow: FC = () => {
               y: level * (verticalDistance + nodeHeight),
             };
           });
+        }
+      });
+
+      // Check for overlaps between different parent groups at this level
+      const sortedLevelNodes = [...levelNodes].sort(
+        (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0),
+      );
+
+      // Resolve overlaps by shifting nodes and their descendants
+      for (let i = 0; i < sortedLevelNodes.length - 1; i++) {
+        const currentNodeId = sortedLevelNodes[i];
+        const nextNodeId = sortedLevelNodes[i + 1];
+
+        if (nodesOverlap(currentNodeId, nextNodeId)) {
+          const currentRight = nodePositions[currentNodeId].x + nodeWidth;
+          const nextLeft = nodePositions[nextNodeId].x;
+          const overlap = currentRight - nextLeft + horizontalDistance;
+
+          // Shift the right node (and all its descendants) to eliminate overlap
+          adjustAncestorPositions(nextNodeId, overlap, new Set<string>());
+
+          // Re-sort the nodes after adjustment
+          sortedLevelNodes.sort(
+            (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0),
+          );
+
+          // Reset counter to check new adjacencies
+          i = Math.max(0, i - 1);
+        }
+      }
+
+      // After resolving overlaps, recenter parents over their children
+      const processedNodes = new Set<string>();
+      Object.keys(childrenByParent).forEach((parentId) => {
+        if (parentId !== "orphans" && !processedNodes.has(parentId)) {
+          adjustAncestorPositions(parentId, 0, processedNodes);
         }
       });
     });
