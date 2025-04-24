@@ -76,12 +76,12 @@ export default function AddItemDialog({
     const newErrors = {
       itemName: !itemName ? "Item name is required" : "",
       itemType: !itemType ? "Item type is required" : "",
-      ipAddress: hideIpField ? "" : !ipAddress ? "IP address is required" : "",
+      ipAddress: "", // IP address is no longer required
     };
 
     setErrors(newErrors);
 
-    // Return true if no errors (all fields filled)
+    // Return true if no errors (all required fields filled)
     return !Object.values(newErrors).some((error) => error);
   };
 
@@ -309,7 +309,6 @@ export default function AddItemDialog({
                         errors.ipAddress &&
                           "border-destructive focus-visible:ring-destructive",
                       )}
-                      required
                     />
                     {errors.ipAddress && (
                       <p className="text-destructive text-sm">
