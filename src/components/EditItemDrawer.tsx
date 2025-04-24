@@ -365,16 +365,14 @@ export function EditItemDrawer({
                       <SelectValue placeholder="Select a type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {itemTypes
-                        .filter((type) => type.value !== "ISP")
-                        .map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            <div className="flex items-center gap-2">
-                              {getIconForType(type.value)}
-                              <span>{type.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
+                      {itemTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div className="flex items-center gap-2">
+                            {getIconForType(type.value)}
+                            <span>{type.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
