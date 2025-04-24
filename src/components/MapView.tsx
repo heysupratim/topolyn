@@ -404,6 +404,42 @@ const Flow: FC = () => {
       return node1Right + buffer > node2Left && node1Left - buffer < node2Right;
     };
 
+    // Function to ensure minimum spacing between nodes on the same level
+    const enforceMinimumSpacing = (nodeIds: string[]) => {
+      if (nodeIds.length <= 1) return;
+
+      // Sort nodes by x position
+      const sortedNodeIds = [...nodeIds].sort(
+        (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0),
+      );
+
+      // Iterate through nodes and ensure minimum spacing
+      for (let i = 1; i < sortedNodeIds.length; i++) {
+        const prevNodeId = sortedNodeIds[i - 1];
+        const currentNodeId = sortedNodeIds[i];
+
+        const prevNode = nodePositions[prevNodeId];
+        const currentNode = nodePositions[currentNodeId];
+
+        if (prevNode && currentNode) {
+          const minRequiredX = prevNode.x + nodeWidth + horizontalDistance;
+
+          // If current node is too close to previous node, adjust its position
+          if (currentNode.x < minRequiredX) {
+            const adjustmentNeeded = minRequiredX - currentNode.x;
+
+            // Shift current node and all nodes to its right
+            for (let j = i; j < sortedNodeIds.length; j++) {
+              const nodeToShift = sortedNodeIds[j];
+              if (nodePositions[nodeToShift]) {
+                nodePositions[nodeToShift].x += adjustmentNeeded;
+              }
+            }
+          }
+        }
+      }
+    };
+
     // Function to recursively adjust ancestor positions
     const adjustAncestorPositions = (
       nodeId: string,
@@ -539,6 +575,9 @@ const Flow: FC = () => {
         }
       });
 
+      // Apply minimum spacing enforcement to all nodes at this level
+      enforceMinimumSpacing(levelNodes);
+
       // Check for overlaps between different parent groups at this level
       const sortedLevelNodes = [...levelNodes].sort(
         (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0),
@@ -566,6 +605,9 @@ const Flow: FC = () => {
           i = Math.max(0, i - 1);
         }
       }
+
+      // Apply minimum spacing enforcement again after overlap resolution
+      enforceMinimumSpacing(levelNodes);
 
       // After resolving overlaps, recenter parents over their children
       const processedNodes = new Set<string>();
