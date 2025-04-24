@@ -12,6 +12,8 @@ import { Slider } from "./ui/slider";
 import { Label } from "./ui/label";
 import { useMapNodes } from "./map/MapNodes";
 import InventoryItemNode from "./map/InventoryItemNode";
+import { EditItemDrawer } from "./EditItemDrawer";
+import type { InventoryItem } from "@/context/InventoryContext";
 
 interface CustomControlsProps {
   onZoomIn: () => void;
@@ -202,6 +204,8 @@ const Flow: FC = () => {
   const [verticalDistance, setVerticalDistance] = useState(80);
   const [nodeWidth, setNodeWidth] = useState(150);
   const [nodeHeight, setNodeHeight] = useState(120);
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Handle distance changes
   const handleHorizontalDistanceChange = (value: number[]) => {
@@ -220,6 +224,15 @@ const Flow: FC = () => {
     setNodeHeight(value[0]);
   };
 
+  // Handle node click
+  const handleNodeClick = (nodeId: string) => {
+    const item = items.find((item) => item.id === nodeId);
+    if (item) {
+      setSelectedItem(item);
+      setIsDrawerOpen(true);
+    }
+  };
+
   // Use the extracted node generation logic
   const { nodes, edges } = useMapNodes({
     items,
@@ -229,6 +242,18 @@ const Flow: FC = () => {
     nodeHeight,
   });
 
+  // Add onClick handler to nodes
+  const nodesWithEvents = useMemo(() => {
+    return nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        id: node.id,
+        onNodeClick: handleNodeClick,
+      },
+    }));
+  }, [nodes]);
+
   // Define node types for the ReactFlow component
   const nodeTypes = useMemo(() => ({ inventoryItem: InventoryItemNode }), []);
 
@@ -236,39 +261,49 @@ const Flow: FC = () => {
   const proOptions = { hideAttribution: true };
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      nodeTypes={nodeTypes}
-      proOptions={proOptions}
-      className="bg-background h-full w-full rounded-md"
-      fitView
-      nodesDraggable={false}
-      nodesConnectable={false}
-      elementsSelectable={false}
-    >
-      <Background />
-      <CustomControls
-        onZoomIn={() => zoomIn()}
-        onZoomOut={() => zoomOut()}
-        onFitView={() => fitView()}
-        onCustomize={() =>
-          setIsCustomizationPanelOpen(!isCustomizationPanelOpen)
-        }
-      />
-      <CustomizationPanel
-        horizontalDistance={horizontalDistance}
-        verticalDistance={verticalDistance}
-        nodeWidth={nodeWidth}
-        nodeHeight={nodeHeight}
-        onHorizontalDistanceChange={handleHorizontalDistanceChange}
-        onVerticalDistanceChange={handleVerticalDistanceChange}
-        onNodeWidthChange={handleNodeWidthChange}
-        onNodeHeightChange={handleNodeHeightChange}
-        isOpen={isCustomizationPanelOpen}
-        onClose={() => setIsCustomizationPanelOpen(false)}
-      />
-    </ReactFlow>
+    <>
+      <ReactFlow
+        nodes={nodesWithEvents}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        proOptions={proOptions}
+        className="bg-background h-full w-full rounded-md"
+        fitView
+        nodesDraggable={false}
+        nodesConnectable={false}
+        elementsSelectable={true}
+      >
+        <Background />
+        <CustomControls
+          onZoomIn={() => zoomIn()}
+          onZoomOut={() => zoomOut()}
+          onFitView={() => fitView()}
+          onCustomize={() =>
+            setIsCustomizationPanelOpen(!isCustomizationPanelOpen)
+          }
+        />
+        <CustomizationPanel
+          horizontalDistance={horizontalDistance}
+          verticalDistance={verticalDistance}
+          nodeWidth={nodeWidth}
+          nodeHeight={nodeHeight}
+          onHorizontalDistanceChange={handleHorizontalDistanceChange}
+          onVerticalDistanceChange={handleVerticalDistanceChange}
+          onNodeWidthChange={handleNodeWidthChange}
+          onNodeHeightChange={handleNodeHeightChange}
+          isOpen={isCustomizationPanelOpen}
+          onClose={() => setIsCustomizationPanelOpen(false)}
+        />
+      </ReactFlow>
+
+      {selectedItem && (
+        <EditItemDrawer
+          item={selectedItem}
+          isOpen={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+        />
+      )}
+    </>
   );
 };
 
