@@ -233,14 +233,10 @@ const Flow: FC = () => {
   // Handle distance changes
   const handleHorizontalDistanceChange = (value: number[]) => {
     setHorizontalDistance(value[0]);
-    // Small delay to ensure nodes are repositioned before fitting view
-    setTimeout(() => fitView({ padding: 0.2 }), 50);
   };
 
   const handleVerticalDistanceChange = (value: number[]) => {
     setVerticalDistance(value[0]);
-    // Small delay to ensure nodes are repositioned before fitting view
-    setTimeout(() => fitView({ padding: 0.2 }), 50);
   };
 
   const handleNodeWidthChange = (value: number[]) => {
