@@ -84,6 +84,13 @@ export function EditItemDrawer({
     return <Server className="h-4 w-4" />; // Default icon
   };
 
+  // Update form data whenever the item changes
+  useEffect(() => {
+    if (item) {
+      setFormData({ ...item });
+    }
+  }, [item]);
+
   // Initialize links from the current item
   useEffect(() => {
     if (item && item.outgoingLinks) {
