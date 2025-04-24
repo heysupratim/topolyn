@@ -23,13 +23,13 @@ const InventoryItemNode: FC<NodeProps> = ({ data }) => {
       </div>
       <Handle
         type="source"
-        position={Position.Bottom}
+        position={data.isVertical ? Position.Bottom : Position.Right}
         id="source"
         className="invisible h-2 w-2"
       />
       <Handle
         type="target"
-        position={Position.Top}
+        position={data.isVertical ? Position.Top : Position.Left}
         id="target"
         className="invisible h-2 w-2"
       />

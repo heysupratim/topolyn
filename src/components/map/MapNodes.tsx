@@ -11,6 +11,7 @@ interface MapNodesOptions {
   verticalDistance: number;
   nodeWidth: number;
   nodeHeight: number;
+  isVertical?: boolean;
 }
 
 interface HierarchyItem {
@@ -112,6 +113,7 @@ export function useMapNodes({
   verticalDistance,
   nodeWidth,
   nodeHeight,
+  isVertical,
 }: MapNodesOptions) {
   // Create nodes from inventory items
   const nodes: Node[] = useMemo(() => {
@@ -136,8 +138,8 @@ export function useMapNodes({
     tree.each((node) => {
       if ((node.data as HierarchyItem).id !== "virtual-root") {
         nodePositions[node.data.id] = {
-          x: node.x,
-          y: node.y,
+          x: isVertical ? node.x : node.y,
+          y: isVertical ? node.y : node.x,
         };
       }
     });
@@ -167,7 +169,14 @@ export function useMapNodes({
     });
 
     return positionedNodes;
-  }, [items, horizontalDistance, verticalDistance, nodeWidth, nodeHeight]);
+  }, [
+    items,
+    horizontalDistance,
+    verticalDistance,
+    nodeWidth,
+    nodeHeight,
+    isVertical,
+  ]);
 
   // Create edges from item links
   const edges: Edge[] = useMemo(() => {

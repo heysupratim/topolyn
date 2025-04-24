@@ -5,7 +5,15 @@ import ReactFlow, {
   useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Minus, Plus, Maximize, Wrench, X } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  Maximize,
+  Wrench,
+  X,
+  ArrowDownUp,
+  ArrowLeftRight,
+} from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import { Slider } from "./ui/slider";
@@ -20,6 +28,8 @@ interface CustomControlsProps {
   onZoomOut: () => void;
   onFitView: () => void;
   onCustomize: () => void;
+  onToggleDirection: () => void;
+  isVertical: boolean;
 }
 
 // Custom controls using shadcn UI components
@@ -28,6 +38,8 @@ const CustomControls: FC<CustomControlsProps> = ({
   onZoomOut,
   onFitView,
   onCustomize,
+  onToggleDirection,
+  isVertical,
 }) => {
   return (
     <div className="bg-card absolute right-4 bottom-4 z-50 flex flex-col gap-2 rounded-md border p-1 shadow-sm">
@@ -57,6 +69,21 @@ const CustomControls: FC<CustomControlsProps> = ({
       >
         <Maximize className="h-4 w-4" />
         <span className="sr-only">Fit view</span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onToggleDirection}
+        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
+      >
+        {isVertical ? (
+          <ArrowDownUp className="h-4 w-4" />
+        ) : (
+          <ArrowLeftRight className="h-4 w-4" />
+        )}
+        <span className="sr-only">
+          Switch to {isVertical ? "horizontal" : "vertical"} layout
+        </span>
       </Button>
       <Button
         variant="ghost"
@@ -206,6 +233,7 @@ const Flow: FC = () => {
   const [nodeHeight, setNodeHeight] = useState(120);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isVertical, setIsVertical] = useState(true);
 
   // Handle distance changes
   const handleHorizontalDistanceChange = (value: number[]) => {
@@ -224,6 +252,11 @@ const Flow: FC = () => {
     setNodeHeight(value[0]);
   };
 
+  // Toggle layout direction
+  const toggleDirection = () => {
+    setIsVertical(!isVertical);
+  };
+
   // Handle node click
   const handleNodeClick = (nodeId: string) => {
     const item = items.find((item) => item.id === nodeId);
@@ -240,6 +273,7 @@ const Flow: FC = () => {
     verticalDistance,
     nodeWidth,
     nodeHeight,
+    isVertical,
   });
 
   // Add onClick handler to nodes
@@ -250,6 +284,7 @@ const Flow: FC = () => {
         ...node.data,
         id: node.id,
         onNodeClick: handleNodeClick,
+        isVertical: isVertical,
       },
     }));
   }, [nodes]);
@@ -281,6 +316,8 @@ const Flow: FC = () => {
           onCustomize={() =>
             setIsCustomizationPanelOpen(!isCustomizationPanelOpen)
           }
+          onToggleDirection={toggleDirection}
+          isVertical={isVertical}
         />
         <CustomizationPanel
           horizontalDistance={horizontalDistance}
