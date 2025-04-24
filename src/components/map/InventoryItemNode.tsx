@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 const InventoryItemNode: FC<NodeProps> = ({ data }) => {
   return (
     <div
-      className="bg-card border-border hover:bg-accent cursor-pointer rounded-md border p-4 shadow-sm transition-all hover:shadow-md"
+      className="bg-card border-border hover:bg-accent flex cursor-pointer flex-col items-center justify-center rounded-md border p-4 shadow-sm transition-all hover:shadow-md"
       style={{ width: `${data.width}px`, height: `${data.height}px` }}
       onClick={() => data.onNodeClick && data.onNodeClick(data.id)}
     >

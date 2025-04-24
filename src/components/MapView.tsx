@@ -163,8 +163,8 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
         </div>
         <Slider
           id="node-width"
-          min={150}
-          max={400}
+          min={130}
+          max={300}
           step={10}
           value={[nodeWidth]}
           onValueChange={onNodeWidthChange}
@@ -182,7 +182,7 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
         <Slider
           id="node-height"
           min={120}
-          max={400}
+          max={300}
           step={10}
           value={[nodeHeight]}
           onValueChange={onNodeHeightChange}
@@ -202,7 +202,7 @@ const Flow: FC = () => {
     useState(false);
   const [horizontalDistance, setHorizontalDistance] = useState(40);
   const [verticalDistance, setVerticalDistance] = useState(80);
-  const [nodeWidth, setNodeWidth] = useState(150);
+  const [nodeWidth, setNodeWidth] = useState(130);
   const [nodeHeight, setNodeHeight] = useState(120);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
