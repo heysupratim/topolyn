@@ -224,6 +224,7 @@ export function EditItemDrawer({
     formData.type === "ISP" ? itemLinks.length === 0 : isNetworkDevice;
 
   // Filter out the current item from available items to link
+  // When item is ISP: only show network devices
   // Also filter out items that are already selected and ISP nodes
   const getAvailableItems = (currentIndex: number) => {
     return items
@@ -233,7 +234,11 @@ export function EditItemDrawer({
           i.type !== "ISP" && // Exclude ISP nodes
           !itemLinks.some(
             (link, idx) => link.targetItemId === i.id && idx !== currentIndex,
-          ),
+          ) &&
+          // For ISP nodes, only show network devices
+          (formData.type === "ISP"
+            ? NETWORK_DEVICE_TYPES.includes(i.type)
+            : true),
       )
       .filter(
         (item) =>
