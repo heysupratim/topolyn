@@ -362,7 +362,7 @@ const Flow: FC = () => {
     });
 
     // Function to check if two nodes overlap
-    const nodesOverlap = (node1Id: string, node2Id: string, extraBuffer = 20) => {
+    const nodesOverlap = (node1Id: string, node2Id: string) => {
       const node1Pos = nodePositions[node1Id];
       const node2Pos = nodePositions[node2Id];
 
@@ -374,11 +374,14 @@ const Flow: FC = () => {
       const node2Right = node2Pos.x + nodeWidth;
 
       // Check horizontal overlap with a buffer to ensure visual separation
-      return node1Right + extraBuffer > node2Left && node1Left - extraBuffer < node2Right;
+      return node1Right > node2Left && node1Left < node2Right;
     };
 
     // Function to ensure minimum spacing between nodes on the same level
-    const enforceMinimumSpacing = (nodeIds: string[], minSpacing = horizontalDistance) => {
+    const enforceMinimumSpacing = (
+      nodeIds: string[],
+      minSpacing = horizontalDistance,
+    ) => {
       if (nodeIds.length <= 1) return;
 
       // Sort nodes by x position
@@ -443,32 +446,44 @@ const Flow: FC = () => {
     };
 
     // Function to center parent node over its children
-    const centerParentOverChildren = (parentId: string, processedNodes = new Set<string>()) => {
+    const centerParentOverChildren = (
+      parentId: string,
+      processedNodes = new Set<string>(),
+    ) => {
       if (processedNodes.has(parentId)) return;
       processedNodes.add(parentId);
 
       const childrenIds = parentToChildren[parentId] || [];
-      
-      if (childrenIds.length > 0 && childrenIds.every(id => nodePositions[id])) {
+
+      if (
+        childrenIds.length > 0 &&
+        childrenIds.every((id) => nodePositions[id])
+      ) {
         // Find leftmost and rightmost coordinates of all children
-        const childLeftmost = Math.min(...childrenIds.map(id => nodePositions[id].x));
-        const childRightmost = Math.max(...childrenIds.map(id => nodePositions[id].x + nodeWidth));
-        
+        const childLeftmost = Math.min(
+          ...childrenIds.map((id) => nodePositions[id].x),
+        );
+        const childRightmost = Math.max(
+          ...childrenIds.map((id) => nodePositions[id].x + nodeWidth),
+        );
+
         // Calculate center point of children's bounding box
-        const centerPoint = childLeftmost + (childRightmost - childLeftmost) / 2;
-        
+        const centerPoint =
+          childLeftmost + (childRightmost - childLeftmost) / 2;
+
         // Get current center point of parent
         const parentCenter = nodePositions[parentId].x + nodeWidth / 2;
-        
+
         // Calculate adjustment needed
         const adjustment = centerPoint - parentCenter;
-        
-        if (Math.abs(adjustment) > 2) { // Only adjust if difference is significant
+
+        if (Math.abs(adjustment) > 2) {
+          // Only adjust if difference is significant
           nodePositions[parentId].x += adjustment;
-          
+
           // Propagate adjustment to parent's parents if needed
           if (childToParents[parentId]) {
-            childToParents[parentId].forEach(parentParentId => {
+            childToParents[parentId].forEach((parentParentId) => {
               centerParentOverChildren(parentParentId, processedNodes);
             });
           }
@@ -481,54 +496,54 @@ const Flow: FC = () => {
       let overlapsResolved = true;
       let iterations = 0;
       const maxIterations = 50; // Safety to prevent infinite loops
-      
+
       do {
         overlapsResolved = true;
         iterations++;
-        
+
         // Check each level for overlaps
-        Object.keys(nodesByLevel).forEach(levelStr => {
+        Object.keys(nodesByLevel).forEach((levelStr) => {
           const level = parseInt(levelStr);
           const levelNodes = nodesByLevel[level];
-          
+
           if (levelNodes.length <= 1) return;
-          
+
           // Sort nodes by x position
           const sortedNodes = [...levelNodes].sort(
-            (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0)
+            (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0),
           );
-          
+
           // Check each adjacent pair for overlaps
           for (let i = 0; i < sortedNodes.length - 1; i++) {
             const currentNodeId = sortedNodes[i];
             const nextNodeId = sortedNodes[i + 1];
-            
-            if (nodesOverlap(currentNodeId, nextNodeId, 30)) { // Extra buffer for safety
+
+            if (nodesOverlap(currentNodeId, nextNodeId)) {
               // Calculate required adjustment
               const currentRight = nodePositions[currentNodeId].x + nodeWidth;
               const nextLeft = nodePositions[nextNodeId].x;
-              const overlap = currentRight - nextLeft + horizontalDistance + 10; // Extra buffer
-              
+              const overlap = currentRight - nextLeft + horizontalDistance;
+
               // Move the right node (and its descendants)
               adjustAncestorPositions(nextNodeId, overlap, new Set<string>());
-              
+
               // Recenter parents after adjustments
               if (childToParents[nextNodeId]) {
-                childToParents[nextNodeId].forEach(parentId => {
+                childToParents[nextNodeId].forEach((parentId) => {
                   centerParentOverChildren(parentId, new Set<string>());
                 });
               }
-              
+
               overlapsResolved = false;
               break; // Restart checking this level with new positions
             }
           }
         });
       } while (!overlapsResolved && iterations < maxIterations);
-      
+
       // Final spacing pass to ensure minimum distances
-      Object.values(nodesByLevel).forEach(levelNodes => {
-        enforceMinimumSpacing(levelNodes, horizontalDistance + 10);
+      Object.values(nodesByLevel).forEach((levelNodes) => {
+        enforceMinimumSpacing(levelNodes, horizontalDistance);
       });
     };
 
@@ -536,7 +551,7 @@ const Flow: FC = () => {
     if (nodesByLevel[0]) {
       const levelZeroNodes = nodesByLevel[0];
       // Use more spacing for top level nodes
-      const spacingForTopLevel = Math.max(horizontalDistance * 1.5, 70);
+      const spacingForTopLevel = horizontalDistance * 1.5;
       const totalWidth =
         levelZeroNodes.length * nodeWidth +
         (levelZeroNodes.length - 1) * spacingForTopLevel;
@@ -598,11 +613,11 @@ const Flow: FC = () => {
           // Position orphan nodes centered at this level
           const totalWidth =
             children.length * nodeWidth +
-            (children.length - 1) * (horizontalDistance + 20); // Extra spacing for orphans
+            (children.length - 1) * horizontalDistance;
           const startX = -totalWidth / 2;
 
           children.forEach((nodeId, index) => {
-            const xPos = startX + index * (nodeWidth + horizontalDistance + 20);
+            const xPos = startX + index * (nodeWidth + horizontalDistance);
             nodePositions[nodeId] = {
               x: xPos,
               y: level * (verticalDistance + nodeHeight),
@@ -611,11 +626,11 @@ const Flow: FC = () => {
         } else {
           // Position children underneath their parent
           const parentXPos = nodePositions[parentId]?.x || 0;
-          const minChildSpacing = horizontalDistance + 20; // Increased spacing between children
+          const minChildSpacing = horizontalDistance;
           const totalWidth =
             children.length * nodeWidth +
             (children.length - 1) * minChildSpacing;
-          
+
           // Center children under parent
           const startX = parentXPos - totalWidth / 2 + nodeWidth / 2;
 
@@ -630,74 +645,74 @@ const Flow: FC = () => {
       });
 
       // Apply minimum spacing enforcement to all nodes at this level
-      enforceMinimumSpacing(levelNodes, horizontalDistance + 20);
+      enforceMinimumSpacing(levelNodes, horizontalDistance);
 
       // After positioning the children, check for overlaps and adjust
       let hasOverlaps = true;
       const maxOverlapIterations = 5;
       let overlapIteration = 0;
-      
+
       while (hasOverlaps && overlapIteration < maxOverlapIterations) {
         overlapIteration++;
         hasOverlaps = false;
-        
+
         // Sort nodes by x position
         const sortedLevelNodes = [...levelNodes].sort(
-          (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0)
+          (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0),
         );
-        
+
         // Check for and resolve overlaps
         for (let i = 0; i < sortedLevelNodes.length - 1; i++) {
           const currentNodeId = sortedLevelNodes[i];
           const nextNodeId = sortedLevelNodes[i + 1];
-          
+
           if (nodesOverlap(currentNodeId, nextNodeId)) {
             hasOverlaps = true;
-            
+
             // Calculate adjustment needed
             const currentRight = nodePositions[currentNodeId].x + nodeWidth;
             const nextLeft = nodePositions[nextNodeId].x;
             const overlap = currentRight - nextLeft + horizontalDistance + 20;
-            
+
             // Shift the next node and its descendants
             adjustAncestorPositions(nextNodeId, overlap, new Set<string>());
-            
+
             // Re-sort after adjustment
             sortedLevelNodes.sort(
-              (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0)
+              (a, b) => (nodePositions[a]?.x || 0) - (nodePositions[b]?.x || 0),
             );
-            
+
             // Restart checking from the adjusted node
             i = Math.max(0, i - 1);
           }
         }
       }
-      
+
       // After resolving overlaps, recenter parents over their children
-      Object.keys(childrenByParent).forEach(parentId => {
+      Object.keys(childrenByParent).forEach((parentId) => {
         if (parentId !== "orphans") {
           centerParentOverChildren(parentId, new Set<string>());
         }
       });
     });
-    
+
     // Final pass to resolve any remaining overlaps across the entire tree
     resolveAllOverlaps();
-    
+
     // Balance the tree by making sure parents are centered over their children
     // Start from the bottom level and work upward
-    remainingLevels.reverse().forEach(level => {
+    remainingLevels.reverse().forEach((level) => {
       const levelNodes = nodesByLevel[level];
-      
-      levelNodes.forEach(nodeId => {
+
+      levelNodes.forEach((nodeId) => {
         if (childToParents[nodeId]) {
-          childToParents[nodeId].forEach(parentId => {
+          childToParents[nodeId].forEach((parentId) => {
             centerParentOverChildren(parentId, new Set<string>());
           });
         }
       });
     });
-    
+
     // Apply one final check for overlaps
     resolveAllOverlaps();
 
