@@ -4,6 +4,7 @@ import { getIconForType } from "@/lib/Utils";
 import { InventoryItem } from "@/context/InventoryContext";
 import { flextree } from "d3-flextree";
 
+// All interfaces organized at the top
 interface MapNodesOptions {
   items: InventoryItem[];
   horizontalDistance: number;
@@ -12,10 +13,24 @@ interface MapNodesOptions {
   nodeHeight: number;
 }
 
+interface HierarchyItem {
+  id: string;
+  children: HierarchyItem[];
+}
+
+interface ItemWithChildren extends InventoryItem {
+  children: string[];
+}
+
+interface NodePosition {
+  x: number;
+  y: number;
+}
+
 // Helper function to create a hierarchical tree structure
-function createHierarchy(items: InventoryItem[]) {
+function createHierarchy(items: InventoryItem[]): HierarchyItem {
   // Create a mapping from id to item for faster lookup
-  const itemMap = new Map<string, InventoryItem & { children: string[] }>();
+  const itemMap = new Map<string, ItemWithChildren>();
 
   // Initialize items with empty children arrays
   items.forEach((item) => {
@@ -77,8 +92,8 @@ function createHierarchy(items: InventoryItem[]) {
 // Recursive function to build the tree
 function buildTree(
   rootId: string,
-  itemMap: Map<string, InventoryItem & { children: string[] }>,
-): { id: string; children: { id: string; children: any[] }[] }[] {
+  itemMap: Map<string, ItemWithChildren>,
+): HierarchyItem[] {
   const item = itemMap.get(rootId);
   if (!item) return [];
 
@@ -86,7 +101,7 @@ function buildTree(
     const children = buildTree(childId, itemMap);
     return {
       id: childId,
-      children: children.flat(),
+      children: children,
     };
   });
 }
@@ -101,13 +116,13 @@ export function useMapNodes({
   // Create nodes from inventory items
   const nodes: Node[] = useMemo(() => {
     // Create a mapping to store the x,y position of each node
-    const nodePositions: Record<string, { x: number; y: number }> = {};
+    const nodePositions: Record<string, NodePosition> = {};
 
     // Create a hierarchical structure from the items
     const hierarchy = createHierarchy(items);
 
     // Set up the flextree layout with the specified parameters
-    const layout = flextree<{ id: string; children: any[] }>({
+    const layout = flextree<HierarchyItem>({
       children: (d) => d.children || [],
     })
       .nodeSize([nodeWidth, nodeHeight + verticalDistance])
@@ -119,7 +134,7 @@ export function useMapNodes({
 
     // Extract positions from the layout
     tree.each((node) => {
-      if ((node.data as { id: string }).id !== "virtual-root") {
+      if ((node.data as HierarchyItem).id !== "virtual-root") {
         nodePositions[node.data.id] = {
           x: node.x,
           y: node.y,
