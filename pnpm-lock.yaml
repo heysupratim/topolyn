@@ -68,6 +68,9 @@ importers:
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.1.2(@types/react@19.1.2))(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      d3-flextree:
+        specifier: ^2.1.2
+        version: 2.1.2
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -114,6 +117,9 @@ importers:
       '@eslint/js':
         specifier: ^9.25.0
         version: 9.25.0
+      '@types/d3-flextree':
+        specifier: ^2.1.4
+        version: 2.1.4
       '@types/node':
         specifier: ^22.14.1
         version: 22.14.1
@@ -1237,6 +1243,9 @@ packages:
   '@types/d3-fetch@3.0.7':
     resolution: {integrity: sha512-fTAfNmxSb9SOWNB9IoG5c8Hg6R+AzUHDRlsXsDZsNp6sxAEOP0tkP3gKkNSO/qmHPoBFTxNrjDprVHDQDvo5aA==}
 
+  '@types/d3-flextree@2.1.4':
+    resolution: {integrity: sha512-VcJAeoG51p0RBese55p/OHarbqe9QvQauzCkRAuORT3t9UOa+LzqCpTBMVYxBahyp4vAe1ML3sgeQKRU7Gv+KA==}
+
   '@types/d3-force@3.0.10':
     resolution: {integrity: sha512-ZYeSaCF3p73RdOKcjj+swRlZfnYpK1EbaDiYICEEp5Q6sUiqFaFQ9qgoshp5CzIyyb/yD09kD9o2zEltCexlgw==}
 
@@ -1494,9 +1503,15 @@ packages:
     resolution: {integrity: sha512-wR/XK3D3XcLIZwpbvQwQ5fK+8Ykds1ip7A2Txe0yxncXSdq1L9skcG7blcedkOX+ZcgxGAmLX1FrRGbADwzi0w==}
     engines: {node: '>=12'}
 
+  d3-flextree@2.1.2:
+    resolution: {integrity: sha512-gJiHrx5uTTHq44bjyIb3xpbmmdZcWLYPKeO9EPVOq8EylMFOiH2+9sWqKAiQ4DcFuOZTAxPOQyv0Rnmji/g15A==}
+
   d3-format@3.1.0:
     resolution: {integrity: sha512-YyUI6AEuY/Wpt8KWLgZHsIU86atmikuoOmCfommt0LYHiQSPjvX2AcFc38PX0CBpr2RCyZhjex+NS/LPOv6YqA==}
     engines: {node: '>=12'}
+
+  d3-hierarchy@1.1.9:
+    resolution: {integrity: sha512-j8tPxlqh1srJHAtxfvOUwKNYJkQuBFdM1+JAUfq6xqH5eAqf93L7oG1NVqDa4CpFZNvnNKtCYEUC8KY9yEn9lQ==}
 
   d3-interpolate@3.0.1:
     resolution: {integrity: sha512-3bYs1rOD33uo8aqJfKP3JWPAibgw8Zm2+L9vBKEHJ2Rg+viTR7o5Mmv5mZcieN+FRYaAOWX5SJATX6k1PWz72g==}
@@ -3494,6 +3509,10 @@ snapshots:
     dependencies:
       '@types/d3-dsv': 3.0.7
 
+  '@types/d3-flextree@2.1.4':
+    dependencies:
+      '@types/d3-hierarchy': 3.1.7
+
   '@types/d3-force@3.0.10': {}
 
   '@types/d3-format@3.0.4': {}
@@ -3810,7 +3829,13 @@ snapshots:
 
   d3-ease@3.0.1: {}
 
+  d3-flextree@2.1.2:
+    dependencies:
+      d3-hierarchy: 1.1.9
+
   d3-format@3.1.0: {}
+
+  d3-hierarchy@1.1.9: {}
 
   d3-interpolate@3.0.1:
     dependencies:
