@@ -326,17 +326,7 @@ export function EditItemDrawer({
                   </SelectTrigger>
                   <SelectContent>
                     {itemTypes
-                      .filter((type) => {
-                        // Check if current type is a network device
-                        const isCurrentTypeNetworkDevice =
-                          NETWORK_DEVICE_TYPES.includes(formData.type);
-                        // For network devices (Router, Switch, Firewall, Access Point), only show those types
-                        if (isCurrentTypeNetworkDevice) {
-                          return NETWORK_DEVICE_TYPES.includes(type.value);
-                        }
-                        // For non-network devices, only show non-network device types
-                        return !NETWORK_DEVICE_TYPES.includes(type.value);
-                      })
+                      .filter((type) => type.value !== "ISP")
                       .map((type) => (
                         <SelectItem key={type.value} value={type.value}>
                           <div className="flex items-center gap-2">
