@@ -112,9 +112,11 @@ interface CustomizationPanelProps {
   showIcon: boolean;
   showLabel: boolean;
   showIpAddress: boolean;
+  showBackground: boolean;
   onToggleShowIcon: () => void;
   onToggleShowLabel: () => void;
   onToggleShowIpAddress: () => void;
+  onToggleShowBackground: () => void;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -131,9 +133,11 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
   showIcon,
   showLabel,
   showIpAddress,
+  showBackground,
   onToggleShowIcon,
   onToggleShowLabel,
   onToggleShowIpAddress,
+  onToggleShowBackground,
   isOpen,
   onClose,
 }) => {
@@ -262,6 +266,16 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
               Show IP Address
             </Label>
           </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-background"
+              checked={showBackground}
+              onCheckedChange={onToggleShowBackground}
+            />
+            <Label htmlFor="show-background" className="text-sm">
+              Show Background
+            </Label>
+          </div>
         </div>
       </div>
     </div>
@@ -285,6 +299,7 @@ const Flow: FC = () => {
   const [showIcon, setShowIcon] = useState(true);
   const [showLabel, setShowLabel] = useState(true);
   const [showIpAddress, setShowIpAddress] = useState(true);
+  const [showBackground, setShowBackground] = useState(true);
 
   // Handle distance changes
   const handleHorizontalDistanceChange = (value: number[]) => {
@@ -325,6 +340,7 @@ const Flow: FC = () => {
   const toggleShowIcon = () => setShowIcon(!showIcon);
   const toggleShowLabel = () => setShowLabel(!showLabel);
   const toggleShowIpAddress = () => setShowIpAddress(!showIpAddress);
+  const toggleShowBackground = () => setShowBackground(!showBackground);
 
   // Use the extracted node generation logic
   const { nodes, edges } = useMapNodes({
@@ -348,9 +364,10 @@ const Flow: FC = () => {
         showIcon,
         showLabel,
         showIpAddress,
+        showBackground,
       },
     }));
-  }, [nodes, showIcon, showLabel, showIpAddress, isVertical]);
+  }, [nodes, showIcon, showLabel, showIpAddress, showBackground, isVertical]);
 
   // Define node types for the ReactFlow component
   const nodeTypes = useMemo(() => ({ inventoryItem: InventoryItemNode }), []);
@@ -394,9 +411,11 @@ const Flow: FC = () => {
           showIcon={showIcon}
           showLabel={showLabel}
           showIpAddress={showIpAddress}
+          showBackground={showBackground}
           onToggleShowIcon={toggleShowIcon}
           onToggleShowLabel={toggleShowLabel}
           onToggleShowIpAddress={toggleShowIpAddress}
+          onToggleShowBackground={toggleShowBackground}
           isOpen={isCustomizationPanelOpen}
           onClose={() => setIsCustomizationPanelOpen(false)}
         />

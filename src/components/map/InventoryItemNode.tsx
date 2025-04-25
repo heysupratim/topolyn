@@ -9,10 +9,16 @@ const InventoryItemNode: FC<NodeProps> = ({ data }) => {
   const showLabel = data.showLabel !== undefined ? data.showLabel : true;
   const showIpAddress =
     data.showIpAddress !== undefined ? data.showIpAddress : true;
+  const showBackground =
+    data.showBackground !== undefined ? data.showBackground : true;
 
   return (
     <div
-      className="bg-card border-border hover:bg-accent flex cursor-pointer flex-col items-center justify-center rounded-md border p-4 shadow-sm transition-all hover:shadow-md"
+      className={`flex cursor-pointer flex-col items-center justify-center rounded-md border p-4 transition-all hover:shadow-md ${
+        showBackground
+          ? "bg-card border-border hover:bg-accent shadow-sm"
+          : "border-transparent bg-transparent"
+      }`}
       style={{ width: `${data.width}px`, height: `${data.height}px` }}
       onClick={() => data.onNodeClick && data.onNodeClick(data.id)}
     >
