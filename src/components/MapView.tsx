@@ -18,6 +18,7 @@ import { FC, useMemo, useState } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import { Slider } from "./ui/slider";
 import { Label } from "./ui/label";
+import { Checkbox } from "./ui/checkbox";
 import { useMapNodes } from "./map/MapNodes";
 import InventoryItemNode from "./map/InventoryItemNode";
 import { EditItemDrawer } from "./EditItemDrawer";
@@ -108,6 +109,12 @@ interface CustomizationPanelProps {
   onVerticalDistanceChange: (value: number[]) => void;
   onNodeWidthChange: (value: number[]) => void;
   onNodeHeightChange: (value: number[]) => void;
+  showIcon: boolean;
+  showLabel: boolean;
+  showIpAddress: boolean;
+  onToggleShowIcon: () => void;
+  onToggleShowLabel: () => void;
+  onToggleShowIpAddress: () => void;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -121,6 +128,12 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
   onVerticalDistanceChange,
   onNodeWidthChange,
   onNodeHeightChange,
+  showIcon,
+  showLabel,
+  showIpAddress,
+  onToggleShowIcon,
+  onToggleShowLabel,
+  onToggleShowIpAddress,
   isOpen,
   onClose,
 }) => {
@@ -216,6 +229,41 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
           className="w-48"
         />
       </div>
+
+      <div className="mt-2 pt-2">
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-icon"
+              checked={showIcon}
+              onCheckedChange={onToggleShowIcon}
+            />
+            <Label htmlFor="show-icon" className="text-sm">
+              Show Icon
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-label"
+              checked={showLabel}
+              onCheckedChange={onToggleShowLabel}
+            />
+            <Label htmlFor="show-label" className="text-sm">
+              Show Label
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-ip-address"
+              checked={showIpAddress}
+              onCheckedChange={onToggleShowIpAddress}
+            />
+            <Label htmlFor="show-ip-address" className="text-sm">
+              Show IP Address
+            </Label>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -234,6 +282,9 @@ const Flow: FC = () => {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(true);
+  const [showIcon, setShowIcon] = useState(true);
+  const [showLabel, setShowLabel] = useState(true);
+  const [showIpAddress, setShowIpAddress] = useState(true);
 
   // Handle distance changes
   const handleHorizontalDistanceChange = (value: number[]) => {
@@ -270,6 +321,11 @@ const Flow: FC = () => {
     }
   };
 
+  // Toggle visibility of node elements
+  const toggleShowIcon = () => setShowIcon(!showIcon);
+  const toggleShowLabel = () => setShowLabel(!showLabel);
+  const toggleShowIpAddress = () => setShowIpAddress(!showIpAddress);
+
   // Use the extracted node generation logic
   const { nodes, edges } = useMapNodes({
     items,
@@ -289,9 +345,12 @@ const Flow: FC = () => {
         id: node.id,
         onNodeClick: handleNodeClick,
         isVertical: isVertical,
+        showIcon,
+        showLabel,
+        showIpAddress,
       },
     }));
-  }, [nodes]);
+  }, [nodes, showIcon, showLabel, showIpAddress, isVertical]);
 
   // Define node types for the ReactFlow component
   const nodeTypes = useMemo(() => ({ inventoryItem: InventoryItemNode }), []);
@@ -332,6 +391,12 @@ const Flow: FC = () => {
           onVerticalDistanceChange={handleVerticalDistanceChange}
           onNodeWidthChange={handleNodeWidthChange}
           onNodeHeightChange={handleNodeHeightChange}
+          showIcon={showIcon}
+          showLabel={showLabel}
+          showIpAddress={showIpAddress}
+          onToggleShowIcon={toggleShowIcon}
+          onToggleShowLabel={toggleShowLabel}
+          onToggleShowIpAddress={toggleShowIpAddress}
           isOpen={isCustomizationPanelOpen}
           onClose={() => setIsCustomizationPanelOpen(false)}
         />
