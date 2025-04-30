@@ -20,6 +20,7 @@ import { useInventory } from "@/context/InventoryContext";
 import { Slider } from "./ui/slider";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { useMapNodes } from "./map/MapNodes";
 import InventoryItemNode from "./map/InventoryItemNode";
 import { EditItemDrawer } from "./EditItemDrawer";
@@ -51,66 +52,103 @@ const CustomControls: FC<CustomControlsProps> = ({
       id="map-controls"
       className="bg-card absolute right-4 bottom-4 z-50 flex flex-col gap-2 rounded-md border p-1 shadow-sm"
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onZoomIn}
-        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
-      >
-        <Plus className="h-4 w-4" />
-        <span className="sr-only">Zoom in</span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onZoomOut}
-        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
-      >
-        <Minus className="h-4 w-4" />
-        <span className="sr-only">Zoom out</span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onFitView}
-        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
-      >
-        <Maximize className="h-4 w-4" />
-        <span className="sr-only">Fit view</span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onToggleDirection}
-        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
-      >
-        {isVertical ? (
-          <ArrowDownUp className="h-4 w-4" />
-        ) : (
-          <ArrowLeftRight className="h-4 w-4" />
-        )}
-        <span className="sr-only">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onZoomIn}
+            className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="sr-only">Zoom in</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Zoom in</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onZoomOut}
+            className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
+          >
+            <Minus className="h-4 w-4" />
+            <span className="sr-only">Zoom out</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Zoom out</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onFitView}
+            className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
+          >
+            <Maximize className="h-4 w-4" />
+            <span className="sr-only">Fit view</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Fit view</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleDirection}
+            className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
+          >
+            {isVertical ? (
+              <ArrowDownUp className="h-4 w-4" />
+            ) : (
+              <ArrowLeftRight className="h-4 w-4" />
+            )}
+            <span className="sr-only">
+              Switch to {isVertical ? "horizontal" : "vertical"} layout
+            </span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
           Switch to {isVertical ? "horizontal" : "vertical"} layout
-        </span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onExportImage}
-        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
-      >
-        <Download className="h-4 w-4" />
-        <span className="sr-only">Export as PNG</span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onCustomize}
-        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
-      >
-        <Wrench className="h-4 w-4" />
-        <span className="sr-only">Customize</span>
-      </Button>
+        </TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onExportImage}
+            className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
+          >
+            <Download className="h-4 w-4" />
+            <span className="sr-only">Export Current View as PNG</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Export Current View as PNG</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onCustomize}
+            className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
+          >
+            <Wrench className="h-4 w-4" />
+            <span className="sr-only">Customize</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Customize</TooltipContent>
+      </Tooltip>
     </div>
   );
 };
@@ -433,14 +471,22 @@ const Flow: FC = () => {
 
       // Use html-to-image to capture the ReactFlow view
       import("html-to-image").then(({ toPng }) => {
+        // Get the actual dimensions of the flow
+        const flowBounds = flowElements.getBoundingClientRect();
+        const { width, height } = flowBounds;
+
         toPng(flowElements as HTMLElement, {
           backgroundColor: "transparent", // Make background transparent
           quality: 1.0,
-          pixelRatio: 2, // Higher resolution
+          pixelRatio: 4, // Increased from 4 to 8 for ultra-high resolution
+          width: width, // Capture at 2x the displayed width
+          height: height, // Capture at 2x the displayed height
           style: {
             // Don't apply any transform which might hide nodes
-            width: "100%",
-            height: "100%",
+            width: `${width}px`,
+            height: `${height}px`,
+            transform: "none",
+            transformOrigin: "0 0",
           },
           filter: (node) => {
             // Exclude controls and background from export
@@ -469,9 +515,7 @@ const Flow: FC = () => {
             link.setAttribute("href", dataUrl);
             link.click();
 
-            toast.success(
-              "Image exported successfully without background grid",
-            );
+            toast.success("High-resolution image exported successfully");
           })
           .catch((error) => {
             // Restore control elements visibility in case of error
