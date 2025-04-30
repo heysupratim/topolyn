@@ -3,8 +3,6 @@ import ReactFlow, {
   Background,
   ReactFlowProvider,
   useReactFlow,
-  getNodesBounds,
-  getViewportForBounds,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
@@ -162,7 +160,10 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="bg-card border-border absolute bottom-4 left-4 z-50 flex flex-col gap-4 rounded-md border p-4 shadow-md">
+    <div
+      id="customization-panel"
+      className="bg-card border-border absolute bottom-4 left-4 z-50 flex flex-col gap-4 rounded-md border p-4 shadow-md"
+    >
       <div className="flex items-center justify-between gap-8">
         <h3 className="text-foreground font-medium">Layout Customization</h3>
         <Button
@@ -407,22 +408,20 @@ const Flow: FC = () => {
     try {
       // Hide controls temporarily during export
       const mapControls = document.getElementById("map-controls");
-      const customizationPanel = document.querySelector(
-        ".bg-card.border-border.absolute.bottom-4.left-4",
-      );
+      const customizationPanel = document.getElementById("customization-panel");
 
       // Store original display values
       const mapControlsDisplay = mapControls
         ? mapControls.style.display
         : "block";
+
       const customizationPanelDisplay = customizationPanel
-        ? (customizationPanel as HTMLElement).style.display
+        ? customizationPanel.style.display
         : "block";
 
       // Hide elements
       if (mapControls) mapControls.style.display = "none";
-      if (customizationPanel)
-        (customizationPanel as HTMLElement).style.display = "none";
+      if (customizationPanel) customizationPanel.style.display = "none";
 
       // Use html-to-image to capture the ReactFlow view
       import("html-to-image").then(({ toPng }) => {
@@ -439,8 +438,7 @@ const Flow: FC = () => {
             // Exclude controls from export
             return (
               !node.id ||
-              (node.id !== "map-controls" &&
-                !node.classList?.contains("bg-card"))
+              (node.id !== "map-controls" && node.id !== "customization-panel")
             );
           },
         })
@@ -448,8 +446,7 @@ const Flow: FC = () => {
             // Restore control elements visibility
             if (mapControls) mapControls.style.display = mapControlsDisplay;
             if (customizationPanel)
-              (customizationPanel as HTMLElement).style.display =
-                customizationPanelDisplay;
+              customizationPanel.style.display = customizationPanelDisplay;
 
             // Create a download link
             const link = document.createElement("a");
@@ -468,8 +465,7 @@ const Flow: FC = () => {
             // Restore control elements visibility in case of error
             if (mapControls) mapControls.style.display = mapControlsDisplay;
             if (customizationPanel)
-              (customizationPanel as HTMLElement).style.display =
-                customizationPanelDisplay;
+              customizationPanel.style.display = customizationPanelDisplay;
 
             console.error("Error exporting image:", error);
             toast.error("Failed to export image: " + error.message);
