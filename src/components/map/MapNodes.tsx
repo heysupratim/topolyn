@@ -200,6 +200,12 @@ export function useMapNodes({
               fontSize: 10,
               fontWeight: "500",
             },
+            labelBgStyle: {
+              fill: "var(--card)",
+              fillOpacity: 1,
+              strokeWidth: 1,
+              stroke: "var(--border)",
+            },
             label: link.linkType,
             data: { linkType: link.linkType },
             markerEnd: {
