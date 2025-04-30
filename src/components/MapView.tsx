@@ -409,6 +409,9 @@ const Flow: FC = () => {
       // Hide controls temporarily during export
       const mapControls = document.getElementById("map-controls");
       const customizationPanel = document.getElementById("customization-panel");
+      const backgroundGrid = document.querySelector(
+        ".react-flow__background",
+      ) as HTMLElement;
 
       // Store original display values
       const mapControlsDisplay = mapControls
@@ -419,9 +422,14 @@ const Flow: FC = () => {
         ? customizationPanel.style.display
         : "block";
 
+      const backgroundGridDisplay = backgroundGrid
+        ? backgroundGrid.style.display
+        : "block";
+
       // Hide elements
       if (mapControls) mapControls.style.display = "none";
       if (customizationPanel) customizationPanel.style.display = "none";
+      if (backgroundGrid) backgroundGrid.style.display = "none";
 
       // Use html-to-image to capture the ReactFlow view
       import("html-to-image").then(({ toPng }) => {
@@ -435,10 +443,12 @@ const Flow: FC = () => {
             height: "100%",
           },
           filter: (node) => {
-            // Exclude controls from export
+            // Exclude controls and background from export
             return (
               !node.id ||
-              (node.id !== "map-controls" && node.id !== "customization-panel")
+              (node.id !== "map-controls" &&
+                node.id !== "customization-panel" &&
+                !node.classList?.contains("react-flow__background"))
             );
           },
         })
@@ -447,6 +457,8 @@ const Flow: FC = () => {
             if (mapControls) mapControls.style.display = mapControlsDisplay;
             if (customizationPanel)
               customizationPanel.style.display = customizationPanelDisplay;
+            if (backgroundGrid)
+              backgroundGrid.style.display = backgroundGridDisplay;
 
             // Create a download link
             const link = document.createElement("a");
@@ -458,7 +470,7 @@ const Flow: FC = () => {
             link.click();
 
             toast.success(
-              "Image exported successfully with transparent background",
+              "Image exported successfully without background grid",
             );
           })
           .catch((error) => {
@@ -466,6 +478,8 @@ const Flow: FC = () => {
             if (mapControls) mapControls.style.display = mapControlsDisplay;
             if (customizationPanel)
               customizationPanel.style.display = customizationPanelDisplay;
+            if (backgroundGrid)
+              backgroundGrid.style.display = backgroundGridDisplay;
 
             console.error("Error exporting image:", error);
             toast.error("Failed to export image: " + error.message);
