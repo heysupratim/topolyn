@@ -64,7 +64,7 @@ const CustomControls: FC<CustomControlsProps> = ({
             <span className="sr-only">Zoom in</span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Zoom in</TooltipContent>
+        <TooltipContent side="left">Zoom in</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -79,7 +79,7 @@ const CustomControls: FC<CustomControlsProps> = ({
             <span className="sr-only">Zoom out</span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Zoom out</TooltipContent>
+        <TooltipContent side="left">Zoom out</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -94,7 +94,7 @@ const CustomControls: FC<CustomControlsProps> = ({
             <span className="sr-only">Fit view</span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Fit view</TooltipContent>
+        <TooltipContent side="left">Fit view</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -115,7 +115,7 @@ const CustomControls: FC<CustomControlsProps> = ({
             </span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent side="left">
           Switch to {isVertical ? "horizontal" : "vertical"} layout
         </TooltipContent>
       </Tooltip>
@@ -132,7 +132,7 @@ const CustomControls: FC<CustomControlsProps> = ({
             <span className="sr-only">Export Current View as PNG</span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Export Current View as PNG</TooltipContent>
+        <TooltipContent side="left">Export Current View as PNG</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -147,7 +147,7 @@ const CustomControls: FC<CustomControlsProps> = ({
             <span className="sr-only">Customize</span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Customize</TooltipContent>
+        <TooltipContent side="left">Customize</TooltipContent>
       </Tooltip>
     </div>
   );
