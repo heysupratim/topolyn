@@ -3,6 +3,8 @@ import ReactFlow, {
   Background,
   ReactFlowProvider,
   useReactFlow,
+  getNodesBounds,
+  getViewportForBounds,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
@@ -13,8 +15,9 @@ import {
   X,
   ArrowDownUp,
   ArrowLeftRight,
+  Download,
 } from "lucide-react";
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo, useState, useCallback } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import { Slider } from "./ui/slider";
 import { Label } from "./ui/label";
@@ -22,6 +25,7 @@ import { Checkbox } from "./ui/checkbox";
 import { useMapNodes } from "./map/MapNodes";
 import InventoryItemNode from "./map/InventoryItemNode";
 import { EditItemDrawer } from "./EditItemDrawer";
+import { toast } from "sonner";
 import type { InventoryItem } from "@/context/InventoryContext";
 
 interface CustomControlsProps {
@@ -30,6 +34,7 @@ interface CustomControlsProps {
   onFitView: () => void;
   onCustomize: () => void;
   onToggleDirection: () => void;
+  onExportImage: () => void;
   isVertical: boolean;
 }
 
@@ -40,10 +45,14 @@ const CustomControls: FC<CustomControlsProps> = ({
   onFitView,
   onCustomize,
   onToggleDirection,
+  onExportImage,
   isVertical,
 }) => {
   return (
-    <div className="bg-card absolute right-4 bottom-4 z-50 flex flex-col gap-2 rounded-md border p-1 shadow-sm">
+    <div
+      id="map-controls"
+      className="bg-card absolute right-4 bottom-4 z-50 flex flex-col gap-2 rounded-md border p-1 shadow-sm"
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -85,6 +94,15 @@ const CustomControls: FC<CustomControlsProps> = ({
         <span className="sr-only">
           Switch to {isVertical ? "horizontal" : "vertical"} layout
         </span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onExportImage}
+        className="bg-card hover:bg-accent hover:text-accent-foreground h-8 w-8"
+      >
+        <Download className="h-4 w-4" />
+        <span className="sr-only">Export as PNG</span>
       </Button>
       <Button
         variant="ghost"
@@ -284,7 +302,8 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
 
 // Flow component that uses the ReactFlow hook
 const Flow: FC = () => {
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const reactFlowInstance = useReactFlow();
+  const { zoomIn, zoomOut, fitView } = reactFlowInstance;
   const { items } = useInventory();
 
   const [isCustomizationPanelOpen, setIsCustomizationPanelOpen] =
@@ -375,6 +394,93 @@ const Flow: FC = () => {
   // Define proOptions to hide the watermark
   const proOptions = { hideAttribution: true };
 
+  // Function to export the current map view as a PNG image
+  const exportImage = useCallback(() => {
+    // Get the ReactFlow instance elements
+    const flowElements = document.querySelector(".react-flow");
+
+    if (!flowElements) {
+      toast.error("Could not find flow elements to export");
+      return;
+    }
+
+    try {
+      // Hide controls temporarily during export
+      const mapControls = document.getElementById("map-controls");
+      const customizationPanel = document.querySelector(
+        ".bg-card.border-border.absolute.bottom-4.left-4",
+      );
+
+      // Store original display values
+      const mapControlsDisplay = mapControls
+        ? mapControls.style.display
+        : "block";
+      const customizationPanelDisplay = customizationPanel
+        ? (customizationPanel as HTMLElement).style.display
+        : "block";
+
+      // Hide elements
+      if (mapControls) mapControls.style.display = "none";
+      if (customizationPanel)
+        (customizationPanel as HTMLElement).style.display = "none";
+
+      // Use html-to-image to capture the ReactFlow view
+      import("html-to-image").then(({ toPng }) => {
+        toPng(flowElements as HTMLElement, {
+          backgroundColor: "transparent", // Make background transparent
+          quality: 1.0,
+          pixelRatio: 2, // Higher resolution
+          style: {
+            // Don't apply any transform which might hide nodes
+            width: "100%",
+            height: "100%",
+          },
+          filter: (node) => {
+            // Exclude controls from export
+            return (
+              !node.id ||
+              (node.id !== "map-controls" &&
+                !node.classList?.contains("bg-card"))
+            );
+          },
+        })
+          .then((dataUrl) => {
+            // Restore control elements visibility
+            if (mapControls) mapControls.style.display = mapControlsDisplay;
+            if (customizationPanel)
+              (customizationPanel as HTMLElement).style.display =
+                customizationPanelDisplay;
+
+            // Create a download link
+            const link = document.createElement("a");
+            link.setAttribute(
+              "download",
+              `topolyn-map-${new Date().toISOString().slice(0, 10)}.png`,
+            );
+            link.setAttribute("href", dataUrl);
+            link.click();
+
+            toast.success(
+              "Image exported successfully with transparent background",
+            );
+          })
+          .catch((error) => {
+            // Restore control elements visibility in case of error
+            if (mapControls) mapControls.style.display = mapControlsDisplay;
+            if (customizationPanel)
+              (customizationPanel as HTMLElement).style.display =
+                customizationPanelDisplay;
+
+            console.error("Error exporting image:", error);
+            toast.error("Failed to export image: " + error.message);
+          });
+      });
+    } catch (error) {
+      console.error("Error in export process:", error);
+      toast.error("Failed to export image");
+    }
+  }, [reactFlowInstance, fitView]);
+
   return (
     <>
       <ReactFlow
@@ -397,6 +503,7 @@ const Flow: FC = () => {
             setIsCustomizationPanelOpen(!isCustomizationPanelOpen)
           }
           onToggleDirection={toggleDirection}
+          onExportImage={exportImage}
           isVertical={isVertical}
         />
         <CustomizationPanel
