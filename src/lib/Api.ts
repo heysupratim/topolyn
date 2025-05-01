@@ -56,6 +56,36 @@ export const inventoryApi = {
     return response.data;
   },
 
+  // Get services for a specific inventory item
+  getItemServices: async (id: string) => {
+    const response = await apiClient.get(`/inventory/${id}/services`);
+    return response.data;
+  },
+
+  // Add a service to an inventory item
+  addItemService: async (id: string, name: string, imageUrl?: string) => {
+    const response = await apiClient.post(`/inventory/${id}/services`, {
+      name,
+      imageUrl,
+    });
+    return response.data;
+  },
+
+  // Update a service
+  updateItemService: async (id: string, serviceId: string, name: string, imageUrl?: string) => {
+    const response = await apiClient.put(`/inventory/${id}/services/${serviceId}`, {
+      name,
+      imageUrl,
+    });
+    return response.data;
+  },
+
+  // Delete a service from an inventory item
+  removeItemService: async (id: string, serviceId: string) => {
+    const response = await apiClient.delete(`/inventory/${id}/services/${serviceId}`);
+    return response.data;
+  },
+
   // Get links for a specific inventory item
   getItemLinks: async (id: string) => {
     const response = await apiClient.get(`/inventory/${id}/links`);

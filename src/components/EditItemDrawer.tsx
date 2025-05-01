@@ -63,6 +63,13 @@ interface LinkState {
   linkId?: string; // Existing link ID, if available
 }
 
+// Interface for service state
+interface ServiceState {
+  id?: string;
+  name: string;
+  imageUrl?: string;
+}
+
 export function EditItemDrawer({
   item,
   isOpen,
@@ -76,11 +83,18 @@ export function EditItemDrawer({
     removeItemLink,
     deleteItem,
     getItemLinks,
+    addItemService,
+    updateItemService,
+    removeItemService,
   } = useInventory();
   const [formData, setFormData] = useState<InventoryItem>({ ...item });
   const [isUpdating, setIsUpdating] = useState(false);
   const [itemLinks, setItemLinks] = useState<LinkState[]>([]);
   const [initialItemLinks, setInitialItemLinks] = useState<LinkState[]>([]);
+  const [itemServices, setItemServices] = useState<ServiceState[]>([]);
+  const [initialItemServices, setInitialItemServices] = useState<
+    ServiceState[]
+  >([]);
   const [openCombobox, setOpenCombobox] = useState<number | null>(null);
   const [openLinkTypeSelect, setOpenLinkTypeSelect] = useState<number | null>(
     null,
@@ -123,6 +137,19 @@ export function EditItemDrawer({
     }
   }, [item]);
 
+  // Initialize services from the current item
+  useEffect(() => {
+    if (item && item.services) {
+      const services = item.services.map((service) => ({
+        id: service.id,
+        name: service.name,
+        imageUrl: service.imageUrl || undefined,
+      }));
+      setItemServices(services);
+      setInitialItemServices(services);
+    }
+  }, [item]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -160,6 +187,29 @@ export function EditItemDrawer({
     const newItemLinks = [...itemLinks];
     newItemLinks.splice(index, 1);
     setItemLinks(newItemLinks);
+  };
+
+  const handleAddService = () => {
+    setItemServices([...itemServices, { name: "", imageUrl: "" }]);
+  };
+
+  const handleServiceChange = (
+    index: number,
+    field: keyof ServiceState,
+    value: string,
+  ) => {
+    const newServices = [...itemServices];
+    newServices[index] = {
+      ...newServices[index],
+      [field]: value,
+    };
+    setItemServices(newServices);
+  };
+
+  const handleRemoveService = (index: number) => {
+    const newServices = [...itemServices];
+    newServices.splice(index, 1);
+    setItemServices(newServices);
   };
 
   const handleSave = async () => {
@@ -231,6 +281,55 @@ export function EditItemDrawer({
       for (const link of linksToRemove) {
         if (link.linkId) {
           await removeItemLink(formData.id, link.linkId);
+        }
+      }
+
+      // Process service changes
+      // Find services to add (new items)
+      const servicesToAdd = itemServices.filter((service) => !service.id);
+
+      // Find services to update (existing items with changed name or imageUrl)
+      const servicesToUpdate = itemServices.filter((service) => {
+        const matchingInitialService = initialItemServices.find(
+          (initService) => initService.id === service.id,
+        );
+        return (
+          matchingInitialService &&
+          (matchingInitialService.name !== service.name ||
+            matchingInitialService.imageUrl !== service.imageUrl)
+        );
+      });
+
+      // Find services to remove (items no longer in the list)
+      const servicesToRemove = initialItemServices.filter(
+        (initService) =>
+          !itemServices.some((service) => service.id === initService.id) &&
+          initService.id,
+      );
+
+      // Add new services
+      for (const service of servicesToAdd) {
+        if (service.name) {
+          await addItemService(formData.id, service.name, service.imageUrl);
+        }
+      }
+
+      // Update changed services
+      for (const service of servicesToUpdate) {
+        if (service.id) {
+          await updateItemService(
+            formData.id,
+            service.id,
+            service.name,
+            service.imageUrl,
+          );
+        }
+      }
+
+      // Remove deleted services
+      for (const service of servicesToRemove) {
+        if (service.id) {
+          await removeItemService(formData.id, service.id);
         }
       }
 
@@ -629,6 +728,79 @@ export function EditItemDrawer({
                     </div>
                   )}
                 </div>
+
+                {/* Services Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Services</Label>
+
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleAddService}
+                      className="flex items-center gap-1"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      <span>Add</span>
+                    </Button>
+                  </div>
+
+                  {itemServices.length === 0 ? (
+                    <div className="text-muted-foreground py-2 text-sm">
+                      No services added. Click "Add" to add a service to this
+                      item.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {itemServices.map((service, index) => (
+                        <div key={index} className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex w-full items-center gap-2">
+                              {/* Service name input */}
+                              <Input
+                                placeholder="Service name"
+                                value={service.name}
+                                onChange={(e) =>
+                                  handleServiceChange(
+                                    index,
+                                    "name",
+                                    e.target.value,
+                                  )
+                                }
+                                className="h-9 w-1/2 text-sm"
+                              />
+
+                              {/* Service image URL input */}
+                              <Input
+                                placeholder="Image URL (optional)"
+                                value={service.imageUrl || ""}
+                                onChange={(e) =>
+                                  handleServiceChange(
+                                    index,
+                                    "imageUrl",
+                                    e.target.value,
+                                  )
+                                }
+                                className="h-9 w-1/2 text-sm"
+                              />
+
+                              {/* Remove service button */}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="flex-none"
+                                onClick={() => handleRemoveService(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="mt-4 space-y-3">
                   <Label>Item Information</Label>
                   <Separator />

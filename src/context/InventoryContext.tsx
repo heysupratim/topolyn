@@ -17,6 +17,17 @@ export type InventoryItem = {
   updatedAt: Date;
   outgoingLinks?: ItemLink[];
   incomingLinks?: ItemLink[];
+  services?: Service[];
+};
+
+// Define the shape of a service
+export type Service = {
+  id: string;
+  name: string;
+  imageUrl?: string | null;
+  inventoryItemId: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 // Define the shape of an item link
@@ -53,6 +64,19 @@ interface InventoryContextType {
     port?: string,
   ) => Promise<void>;
   removeItemLink: (id: string, linkId: string) => Promise<void>;
+  getItemServices: (id: string) => Promise<Service[]>;
+  addItemService: (
+    id: string,
+    name: string,
+    imageUrl?: string,
+  ) => Promise<Service>;
+  updateItemService: (
+    id: string,
+    serviceId: string,
+    name: string,
+    imageUrl?: string,
+  ) => Promise<Service>;
+  removeItemService: (id: string, serviceId: string) => Promise<void>;
 }
 
 // Create the context with a default value
@@ -216,6 +240,97 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     }
   };
 
+  // Function to get services for a specific item
+  const getItemServices = async (id: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const services = await inventoryApi.getItemServices(id);
+      return services;
+    } catch (err) {
+      console.error("Failed to get item services:", err);
+      setError(
+        err instanceof Error ? err : new Error("Failed to get item services"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to add a service to an item
+  const addItemService = async (
+    id: string,
+    name: string,
+    imageUrl?: string,
+  ) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const service = await inventoryApi.addItemService(id, name, imageUrl);
+      // Refresh the inventory after adding the service
+      await refreshInventory();
+      return service;
+    } catch (err) {
+      console.error("Failed to add item service:", err);
+      setError(
+        err instanceof Error ? err : new Error("Failed to add item service"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to update a service
+  const updateItemService = async (
+    id: string,
+    serviceId: string,
+    name: string,
+    imageUrl?: string,
+  ) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const service = await inventoryApi.updateItemService(
+        id,
+        serviceId,
+        name,
+        imageUrl,
+      );
+      // Refresh the inventory after updating the service
+      await refreshInventory();
+      return service;
+    } catch (err) {
+      console.error("Failed to update item service:", err);
+      setError(
+        err instanceof Error ? err : new Error("Failed to update item service"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to remove a service from an item
+  const removeItemService = async (id: string, serviceId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await inventoryApi.removeItemService(id, serviceId);
+      // Refresh the inventory after removing the service
+      await refreshInventory();
+    } catch (err) {
+      console.error("Failed to remove item service:", err);
+      setError(
+        err instanceof Error ? err : new Error("Failed to remove item service"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Initial data fetch
   useEffect(() => {
     refreshInventory();
@@ -233,6 +348,10 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     addItemLink,
     updateItemLink,
     removeItemLink,
+    getItemServices,
+    addItemService,
+    updateItemService,
+    removeItemService,
   };
 
   return (
