@@ -53,9 +53,6 @@ export default function AddItemDialog({
   const [itemName, setItemName] = useState("");
   const [itemType, setItemType] = useState("");
   const [ipAddress, setIpAddress] = useState("");
-  const [services, setServices] = useState<
-    Array<{ name: string; imageUrl: string }>
-  >([]);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,25 +85,6 @@ export default function AddItemDialog({
     return !Object.values(newErrors).some((error) => error);
   };
 
-  const handleAddService = () => {
-    setServices([...services, { name: "", imageUrl: "" }]);
-  };
-
-  const handleServiceChange = (index: number, field: string, value: string) => {
-    const newServices = [...services];
-    newServices[index] = {
-      ...newServices[index],
-      [field]: value,
-    };
-    setServices(newServices);
-  };
-
-  const handleRemoveService = (index: number) => {
-    const newServices = [...services];
-    newServices.splice(index, 1);
-    setServices(newServices);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -119,16 +97,10 @@ export default function AddItemDialog({
     setIsSubmitting(true);
 
     try {
-      // Filter out any services with empty names
-      const validServices = services.filter(
-        (service) => service.name.trim() !== "",
-      );
-
       await inventoryApi.createItem({
         name: itemName,
         type: itemType,
         ipAddress: ipAddress,
-        services: validServices.length > 0 ? validServices : undefined,
       });
 
       // Show success message
@@ -138,7 +110,6 @@ export default function AddItemDialog({
       setItemName("");
       setItemType("");
       setIpAddress("");
-      setServices([]);
       setErrors({
         itemName: "",
         itemType: "",
@@ -347,41 +318,6 @@ export default function AddItemDialog({
                   </div>
                 </div>
               )}
-              <div className="grid gap-4">
-                <Label>Services</Label>
-                {services.map((service, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-4 items-center gap-4"
-                  >
-                    <Input
-                      placeholder="Service Name"
-                      value={service.name}
-                      onChange={(e) =>
-                        handleServiceChange(index, "name", e.target.value)
-                      }
-                      className="col-span-2"
-                    />
-                    <Input
-                      placeholder="Image URL"
-                      value={service.imageUrl}
-                      onChange={(e) =>
-                        handleServiceChange(index, "imageUrl", e.target.value)
-                      }
-                      className="col-span-2"
-                    />
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleRemoveService(index)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                <Button variant="outline" onClick={handleAddService}>
-                  Add Service
-                </Button>
-              </div>
             </div>
             <DialogFooter className="mt-6">
               <Button
