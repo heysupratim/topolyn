@@ -134,7 +134,10 @@ export function useMapNodes({
         const width = nodeDimension?.width || defaultNodeWidth;
         const height = nodeDimension?.height || defaultNodeHeight;
 
-        return [width, height + verticalDistance];
+        // Adjust node size based on orientation
+        return isVertical
+          ? [width, height + verticalDistance]
+          : [height + horizontalDistance, width + verticalDistance];
       },
     }).spacing(() => horizontalDistance);
 
