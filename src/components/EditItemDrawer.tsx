@@ -336,7 +336,7 @@ export function EditItemDrawer({
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange} direction="right">
         <DrawerContent
-          className="bg-card flex h-full flex-col px-1 py-8 data-[vaul-drawer-direction=right]:sm:max-w-md"
+          className="bg-card flex h-full flex-col px-1 py-8 data-[vaul-drawer-direction=right]:sm:max-w-lg"
           data-vaul-no-drag
         >
           <div className="mx-auto w-full flex-1 overflow-y-auto">
@@ -422,7 +422,7 @@ export function EditItemDrawer({
                       {itemLinks.map((link, index) => (
                         <div key={index} className="flex flex-col gap-2">
                           <div className="flex items-center gap-2">
-                            <div className="flex flex-1 items-center gap-2">
+                            <div className="flex w-full items-center gap-2">
                               {/* Item selection */}
                               <Popover
                                 modal
@@ -438,7 +438,7 @@ export function EditItemDrawer({
                                     ref={triggerRef}
                                     role="combobox"
                                     aria-expanded={openCombobox === index}
-                                    className="w-2/3 justify-between bg-transparent"
+                                    className="w-1/2 justify-between bg-transparent"
                                   >
                                     {link.targetItemId ? (
                                       <div className="flex w-full items-center overflow-hidden">
@@ -536,7 +536,7 @@ export function EditItemDrawer({
                                     ref={linkTypeTriggerRef}
                                     role="combobox"
                                     aria-expanded={openLinkTypeSelect === index}
-                                    className="w-1/3 justify-between bg-transparent"
+                                    className="w-1/4 justify-between bg-transparent"
                                   >
                                     <span className="truncate overflow-hidden text-ellipsis whitespace-nowrap">
                                       {link.linkType || "Select type"}
@@ -597,34 +597,32 @@ export function EditItemDrawer({
                                   </Command>
                                 </PopoverContent>
                               </Popover>
+
+                              {/* Port input field */}
+                              <Input
+                                placeholder="Port"
+                                value={link.port || ""}
+                                onChange={(e) => {
+                                  const newItemLinks = [...itemLinks];
+                                  newItemLinks[index] = {
+                                    ...newItemLinks[index],
+                                    port: e.target.value,
+                                  };
+                                  setItemLinks(newItemLinks);
+                                }}
+                                className="h-9 w-1/4 text-sm"
+                              />
+
+                              {/* Remove link button */}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="flex-none"
+                                onClick={() => handleRemoveLink(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
                             </div>
-
-                            {/* Remove link button */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="flex-none"
-                              onClick={() => handleRemoveLink(index)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          {/* Add port input field */}
-                          <div className="mt-2 ml-0">
-                            <Input
-                              placeholder="Port (optional)"
-                              value={link.port || ""}
-                              onChange={(e) => {
-                                const newItemLinks = [...itemLinks];
-                                newItemLinks[index] = {
-                                  ...newItemLinks[index],
-                                  port: e.target.value,
-                                };
-                                setItemLinks(newItemLinks);
-                              }}
-                              className="h-8 text-sm"
-                            />
                           </div>
                         </div>
                       ))}
