@@ -110,7 +110,9 @@ export function useMapNodes({
 
       // Dagre positions the node's center, we need to adjust to the top-left corner
       const position = {
-        x: nodeWithPosition.x,
+        x: isVertical
+          ? nodeWithPosition.x - node.data.width / 2
+          : nodeWithPosition.x,
         y: isVertical
           ? nodeWithPosition.y
           : nodeWithPosition.y - node.data.height / 2,
