@@ -333,6 +333,19 @@ export function EditItemDrawer({
         }
       }
 
+      // Force a refresh of the map view by dispatching a custom event
+      // This event will be listened for in the MapView component
+      try {
+        window.dispatchEvent(
+          new CustomEvent("inventory-updated", {
+            detail: { itemId: formData.id, timestamp: Date.now() },
+          }),
+        );
+        console.log("Map Redraw Event dispatched successfully");
+      } catch (err) {
+        console.error("Error dispatching event:", err);
+      }
+
       onOpenChange(false);
       toast.success("Item updated successfully");
     } catch (error) {

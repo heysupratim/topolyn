@@ -15,7 +15,7 @@ import {
   ArrowLeftRight,
   Download,
 } from "lucide-react";
-import { FC, useMemo, useState, useCallback } from "react";
+import { FC, useMemo, useState, useCallback, useEffect } from "react";
 import { useInventory } from "@/context/InventoryContext";
 import { Slider } from "./ui/slider";
 import { Label } from "./ui/label";
@@ -385,7 +385,6 @@ const Flow: FC = () => {
     nodeDimensions,
   });
 
-  // Add onClick handler to nodes
   const nodesWithEvents = useMemo(() => {
     return nodes.map((node) => ({
       ...node,
@@ -566,11 +565,29 @@ const Flow: FC = () => {
 
 // Wrapper component that provides the ReactFlow context
 export function MapView() {
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Listen for inventory updates at the MapView level
+  useEffect(() => {
+    const handleInventoryUpdate = () => {
+      console.log(
+        "MapView received inventory-updated event, forcing complete reload",
+      );
+      // Force entire MapView to remount with a new key
+      setReloadKey((prevKey) => prevKey + 1);
+    };
+
+    window.addEventListener("inventory-updated", handleInventoryUpdate);
+    return () => {
+      window.removeEventListener("inventory-updated", handleInventoryUpdate);
+    };
+  }, []);
+
   return (
     <div className="flex h-full flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:gap-2 lg:px-6">
       <div className="h-full flex-1">
-        <ReactFlowProvider>
-          <Flow />
+        <ReactFlowProvider key={`flow-provider-${reloadKey}`}>
+          <Flow key={`flow-${reloadKey}`} />
         </ReactFlowProvider>
       </div>
     </div>
