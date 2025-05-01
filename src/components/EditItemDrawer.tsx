@@ -413,182 +413,188 @@ export function EditItemDrawer({
                       {itemLinks.map((link, index) => (
                         <div key={index} className="flex flex-col gap-2">
                           <div className="flex items-center gap-2">
-                            {/* Item selection */}
-                            <Popover
-                              modal
-                              open={openCombobox === index}
-                              onOpenChange={(open) => {
-                                setOpenCombobox(open ? index : null);
-                                setSearchQuery("");
-                              }}
-                            >
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  ref={triggerRef}
-                                  role="combobox"
-                                  aria-expanded={openCombobox === index}
-                                  className="w-1/2 flex-1 justify-between bg-transparent"
-                                >
-                                  {link.targetItemId ? (
-                                    <div className="flex w-full items-center overflow-hidden">
-                                      {getIconForType(
-                                        items.find(
-                                          (i) => i.id === link.targetItemId,
-                                        )?.type || "",
-                                      )}
-                                      <span className="ml-2 truncate overflow-hidden text-ellipsis whitespace-nowrap">
-                                        {getItemNameById(link.targetItemId)}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    "Select an item to link"
-                                  )}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 flex-none shrink-0 opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="p-0"
-                                align="start"
-                                side="bottom"
-                                sideOffset={4}
-                                style={{
-                                  width: triggerRef.current?.offsetWidth
-                                    ? `${triggerRef.current.offsetWidth}px`
-                                    : "auto",
+                            <div className="flex flex-1 items-center gap-2">
+                              {/* Item selection */}
+                              <Popover
+                                modal
+                                open={openCombobox === index}
+                                onOpenChange={(open) => {
+                                  setOpenCombobox(open ? index : null);
+                                  setSearchQuery("");
                                 }}
                               >
-                                <Command>
-                                  <CommandInput
-                                    placeholder="Search items..."
-                                    className="h-9"
-                                    value={searchQuery}
-                                    onValueChange={setSearchQuery}
-                                  />
-                                  <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
-                                    <CommandEmpty>
-                                      No matching items found.
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                      {getAvailableItems(index).map((item) => (
-                                        <CommandItem
-                                          key={item.id}
-                                          value={item.id}
-                                          onSelect={(currentValue) => {
-                                            handleLinkTargetChange(
-                                              index,
-                                              currentValue,
-                                            );
-                                            setOpenCombobox(null);
-                                            setSearchQuery("");
-                                          }}
-                                          className="flex items-center gap-2"
-                                        >
-                                          {getIconForType(item.type)}
-                                          <div className="flex flex-col gap-1">
-                                            <span className="">
-                                              {item.name}
-                                            </span>
-                                            <span className="text-muted-foreground text-xs">
-                                              ({item.type})
-                                            </span>
-                                          </div>
-                                          <Check
-                                            className={cn(
-                                              "ml-auto h-4 w-4",
-                                              link.targetItemId === item.id
-                                                ? "opacity-100"
-                                                : "opacity-0",
-                                            )}
-                                          />
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    ref={triggerRef}
+                                    role="combobox"
+                                    aria-expanded={openCombobox === index}
+                                    className="w-2/3 justify-between bg-transparent"
+                                  >
+                                    {link.targetItemId ? (
+                                      <div className="flex w-full items-center overflow-hidden">
+                                        {getIconForType(
+                                          items.find(
+                                            (i) => i.id === link.targetItemId,
+                                          )?.type || "",
+                                        )}
+                                        <span className="ml-2 truncate overflow-hidden text-ellipsis whitespace-nowrap">
+                                          {getItemNameById(link.targetItemId)}
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      "Select an item to link"
+                                    )}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 flex-none shrink-0 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="p-0"
+                                  align="start"
+                                  side="bottom"
+                                  sideOffset={4}
+                                  style={{
+                                    width: triggerRef.current?.offsetWidth
+                                      ? `${triggerRef.current.offsetWidth}px`
+                                      : "auto",
+                                  }}
+                                >
+                                  <Command>
+                                    <CommandInput
+                                      placeholder="Search items..."
+                                      className="h-9"
+                                      value={searchQuery}
+                                      onValueChange={setSearchQuery}
+                                    />
+                                    <CommandList className="max-h-[300px] w-full overflow-y-auto scroll-auto">
+                                      <CommandEmpty>
+                                        No matching items found.
+                                      </CommandEmpty>
+                                      <CommandGroup>
+                                        {getAvailableItems(index).map(
+                                          (item) => (
+                                            <CommandItem
+                                              key={item.id}
+                                              value={item.id}
+                                              onSelect={(currentValue) => {
+                                                handleLinkTargetChange(
+                                                  index,
+                                                  currentValue,
+                                                );
+                                                setOpenCombobox(null);
+                                                setSearchQuery("");
+                                              }}
+                                              className="flex items-center gap-2"
+                                            >
+                                              {getIconForType(item.type)}
+                                              <div className="flex flex-col gap-1">
+                                                <span className="">
+                                                  {item.name}
+                                                </span>
+                                                <span className="text-muted-foreground text-xs">
+                                                  ({item.type})
+                                                </span>
+                                              </div>
+                                              <Check
+                                                className={cn(
+                                                  "ml-auto h-4 w-4",
+                                                  link.targetItemId === item.id
+                                                    ? "opacity-100"
+                                                    : "opacity-0",
+                                                )}
+                                              />
+                                            </CommandItem>
+                                          ),
+                                        )}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
 
-                            {/* Link type selection */}
-                            <Popover
-                              modal
-                              open={openLinkTypeSelect === index}
-                              onOpenChange={(open) => {
-                                setOpenLinkTypeSelect(open ? index : null);
-                                setLinkTypeFilter("");
-                              }}
-                            >
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  ref={linkTypeTriggerRef}
-                                  role="combobox"
-                                  aria-expanded={openLinkTypeSelect === index}
-                                  className="justify-between bg-transparent"
-                                >
-                                  <span className="truncate overflow-hidden text-ellipsis whitespace-nowrap">
-                                    {link.linkType || "Select type"}
-                                  </span>
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 flex-none shrink-0 opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="p-0"
-                                align="start"
-                                side="bottom"
-                                sideOffset={4}
-                                style={{
-                                  width: linkTypeTriggerRef.current?.offsetWidth
-                                    ? `${linkTypeTriggerRef.current.offsetWidth}px`
-                                    : "auto",
+                              {/* Link type selection */}
+                              <Popover
+                                modal
+                                open={openLinkTypeSelect === index}
+                                onOpenChange={(open) => {
+                                  setOpenLinkTypeSelect(open ? index : null);
+                                  setLinkTypeFilter("");
                                 }}
                               >
-                                <Command>
-                                  <CommandInput
-                                    placeholder="Search link types..."
-                                    className="h-9"
-                                    value={linkTypeFilter}
-                                    onValueChange={setLinkTypeFilter}
-                                  />
-                                  <CommandList className="max-h-[200px] overflow-y-auto scroll-auto">
-                                    <CommandEmpty>
-                                      No matching link types found.
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                      {getFilteredLinkTypes().map((type) => (
-                                        <CommandItem
-                                          key={type}
-                                          value={type}
-                                          onSelect={(currentValue) => {
-                                            handleLinkTypeChange(
-                                              index,
-                                              currentValue,
-                                            );
-                                            setOpenLinkTypeSelect(null);
-                                            setLinkTypeFilter("");
-                                          }}
-                                        >
-                                          <span>{type}</span>
-                                          <Check
-                                            className={cn(
-                                              "ml-auto h-4 w-4",
-                                              link.linkType === type
-                                                ? "opacity-100"
-                                                : "opacity-0",
-                                            )}
-                                          />
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    ref={linkTypeTriggerRef}
+                                    role="combobox"
+                                    aria-expanded={openLinkTypeSelect === index}
+                                    className="w-1/3 justify-between bg-transparent"
+                                  >
+                                    <span className="truncate overflow-hidden text-ellipsis whitespace-nowrap">
+                                      {link.linkType || "Select type"}
+                                    </span>
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 flex-none shrink-0 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="p-0"
+                                  align="start"
+                                  side="bottom"
+                                  sideOffset={4}
+                                  style={{
+                                    width: linkTypeTriggerRef.current
+                                      ?.offsetWidth
+                                      ? `${linkTypeTriggerRef.current.offsetWidth}px`
+                                      : "auto",
+                                  }}
+                                >
+                                  <Command>
+                                    <CommandInput
+                                      placeholder="Link type"
+                                      className="h-9"
+                                      value={linkTypeFilter}
+                                      onValueChange={setLinkTypeFilter}
+                                    />
+                                    <CommandList className="max-h-[200px] overflow-y-auto scroll-auto">
+                                      <CommandEmpty>
+                                        No matching link types found.
+                                      </CommandEmpty>
+                                      <CommandGroup>
+                                        {getFilteredLinkTypes().map((type) => (
+                                          <CommandItem
+                                            key={type}
+                                            value={type}
+                                            onSelect={(currentValue) => {
+                                              handleLinkTypeChange(
+                                                index,
+                                                currentValue,
+                                              );
+                                              setOpenLinkTypeSelect(null);
+                                              setLinkTypeFilter("");
+                                            }}
+                                          >
+                                            <span>{type}</span>
+                                            <Check
+                                              className={cn(
+                                                "ml-auto h-4 w-4",
+                                                link.linkType === type
+                                                  ? "opacity-100"
+                                                  : "opacity-0",
+                                              )}
+                                            />
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
 
                             {/* Remove link button */}
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="flex-none"
                               onClick={() => handleRemoveLink(index)}
                             >
                               <X className="h-4 w-4" />
