@@ -206,7 +206,9 @@ export function useMapNodes({
               strokeWidth: 1,
               stroke: "var(--border)",
             },
-            label: link.port ? `${link.linkType} (${link.port})` : link.linkType,
+            label: link.port
+              ? `${link.linkType} (${link.port})`
+              : link.linkType,
             data: { linkType: link.linkType, port: link.port },
             markerEnd: {
               type: MarkerType.Arrow,
