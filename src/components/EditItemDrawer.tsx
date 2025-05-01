@@ -629,18 +629,20 @@ export function EditItemDrawer({
                     </div>
                   )}
                 </div>
-                <div className="mt-4 space-y-1">
-                  <h4 className="text-muted-foreground text-sm font-medium">
-                    Item Information
-                  </h4>
+                <div className="mt-4 space-y-3">
+                  <Label>Item Information</Label>
                   <Separator />
 
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="font-medium">Created</div>
-                    <div>{format(new Date(item.createdAt), "PPP")}</div>
+                  <div className="flex flex-col gap-2 text-sm">
+                    <div className="flex justify-between">
+                      <div className="font-medium">Created</div>
+                      <div>{format(new Date(item.createdAt), "PPP")}</div>
+                    </div>
 
-                    <div className="font-medium">Updated</div>
-                    <div>{format(new Date(item.updatedAt), "PPP")}</div>
+                    <div className="flex justify-between">
+                      <div className="font-medium">Updated</div>
+                      <div>{format(new Date(item.updatedAt), "PPP")}</div>
+                    </div>
                   </div>
                 </div>
               </div>
