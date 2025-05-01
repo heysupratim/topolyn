@@ -33,10 +33,10 @@ const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
   return (
     <div
       ref={nodeRef}
-      className={`flex min-h-[120px] min-w-[130px] cursor-pointer flex-col items-center justify-center rounded-md border p-4 transition-all hover:shadow-md ${
+      className={`flex cursor-pointer flex-col items-center justify-center rounded-md border p-4 transition-all hover:shadow-md ${
         showBackground
-          ? "bg-card border-border hover:bg-accent shadow-sm"
-          : "border-transparent bg-transparent"
+          ? "bg-card border-border hover:bg-accent min-h-[120px] min-w-[130px] shadow-sm"
+          : "h-fit w-fit border-transparent bg-transparent"
       }`}
       onClick={() => data.onNodeClick && data.onNodeClick(data.id)}
     >

@@ -125,9 +125,6 @@ export function useMapNodes({
     // Create a hierarchical structure from the items
     const hierarchy = createHierarchy(items);
 
-    // log the node dimensions for debugging
-    console.log("Node Dimensions:", nodeDimensions);
-
     // Set up the flextree layout with dynamic node sizing
     const layout = flextree<HierarchyItem>({
       children: (d) => d.children || [],
