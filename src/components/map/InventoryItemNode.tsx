@@ -2,6 +2,7 @@ import { FC, useRef, useEffect } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
 import { Badge } from "@/components/ui/badge";
 import { Service } from "@/context/InventoryContext";
+import { AppWindow } from "lucide-react";
 
 // Custom node component to display inventory item details
 const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
@@ -67,8 +68,8 @@ const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
 
         {/* Display services if available and enabled */}
         {showServices && data.services && data.services.length > 0 && (
-          <div className="border-border mt-2 w-full border-t pt-2">
-            <div className="flex flex-col gap-1">
+          <div className="border-border mt-2 w-full border-t pt-4">
+            <div className="flex flex-col gap-2">
               {data.services.map((service: Service, index: number) => (
                 <div key={index} className="flex items-center gap-2">
                   {service.imageUrl ? (
@@ -77,7 +78,9 @@ const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
                       alt={service.name}
                       className="h-4 w-4 rounded-sm object-contain"
                     />
-                  ) : null}
+                  ) : (
+                    <AppWindow className="text-muted-foreground h-4 w-4" />
+                  )}
                   <span className="truncate text-xs">{service.name}</span>
                 </div>
               ))}
