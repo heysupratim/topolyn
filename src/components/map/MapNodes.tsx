@@ -207,7 +207,7 @@ export function useMapNodes({
               stroke: "var(--border)",
             },
             label: link.port
-              ? `${link.linkType} (${link.port})`
+              ? `${link.linkType} | Port ${link.port}`
               : link.linkType,
             data: { linkType: link.linkType, port: link.port },
             markerEnd: {
