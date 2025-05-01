@@ -1,9 +1,9 @@
-import { FC } from "react";
+import { FC, useRef, useEffect } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
 import { Badge } from "@/components/ui/badge";
 
 // Custom node component to display inventory item details
-const InventoryItemNode: FC<NodeProps> = ({ data }) => {
+const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
   // Get visibility settings from data props
   const showIcon = data.showIcon !== undefined ? data.showIcon : true;
   const showLabel = data.showLabel !== undefined ? data.showLabel : true;
@@ -12,14 +12,32 @@ const InventoryItemNode: FC<NodeProps> = ({ data }) => {
   const showBackground =
     data.showBackground !== undefined ? data.showBackground : true;
 
+  // Create a ref to measure the actual rendered size of the node
+  const nodeRef = useRef<HTMLDivElement>(null);
+
+  // Report the node's actual dimensions when it renders or changes
+  useEffect(() => {
+    if (nodeRef.current) {
+      const { offsetWidth, offsetHeight } = nodeRef.current;
+
+      // Only report if we have a callback and the dimensions are valid
+      if (data.onNodeMeasure && offsetWidth && offsetHeight) {
+        data.onNodeMeasure(id.toString(), {
+          width: offsetWidth,
+          height: offsetHeight,
+        });
+      }
+    }
+  }, [id, data.onNodeMeasure, showIcon, showLabel, showIpAddress]);
+
   return (
     <div
-      className={`flex cursor-pointer flex-col items-center justify-center rounded-md border p-4 transition-all hover:shadow-md ${
+      ref={nodeRef}
+      className={`flex min-h-[120px] min-w-[130px] cursor-pointer flex-col items-center justify-center rounded-md border p-4 transition-all hover:shadow-md ${
         showBackground
           ? "bg-card border-border hover:bg-accent shadow-sm"
           : "border-transparent bg-transparent"
       }`}
-      style={{ width: `${data.width}px`, height: `${data.height}px` }}
       onClick={() => data.onNodeClick && data.onNodeClick(data.id)}
     >
       <div className="flex flex-col items-center gap-2">

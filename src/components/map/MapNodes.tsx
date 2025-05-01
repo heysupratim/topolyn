@@ -9,9 +9,10 @@ interface MapNodesOptions {
   items: InventoryItem[];
   horizontalDistance: number;
   verticalDistance: number;
-  nodeWidth: number;
-  nodeHeight: number;
+  defaultNodeWidth: number; // Default width, used as fallback
+  defaultNodeHeight: number; // Default height, used as fallback
   isVertical?: boolean;
+  nodeDimensions?: Record<string, { width: number; height: number }>; // New parameter to receive node dimensions
 }
 
 interface HierarchyItem {
@@ -111,9 +112,10 @@ export function useMapNodes({
   items,
   horizontalDistance,
   verticalDistance,
-  nodeWidth,
-  nodeHeight,
+  defaultNodeWidth,
+  defaultNodeHeight,
   isVertical,
+  nodeDimensions = {}, // Default to empty object
 }: MapNodesOptions) {
   // Create nodes from inventory items
   const nodes: Node[] = useMemo(() => {
@@ -123,12 +125,21 @@ export function useMapNodes({
     // Create a hierarchical structure from the items
     const hierarchy = createHierarchy(items);
 
-    // Set up the flextree layout with the specified parameters
+    // log the node dimensions for debugging
+    console.log("Node Dimensions:", nodeDimensions);
+
+    // Set up the flextree layout with dynamic node sizing
     const layout = flextree<HierarchyItem>({
       children: (d) => d.children || [],
-    })
-      .nodeSize([nodeWidth, nodeHeight + verticalDistance])
-      .spacing(() => horizontalDistance);
+      nodeSize: (d) => {
+        // Get the custom dimensions for this node, or use default values
+        const nodeDimension = nodeDimensions[d.data.id];
+        const width = nodeDimension?.width || defaultNodeWidth;
+        const height = nodeDimension?.height || defaultNodeHeight;
+
+        return [width, height + verticalDistance];
+      },
+    }).spacing(() => horizontalDistance);
 
     // Apply the layout
     const tree = layout.hierarchy(hierarchy);
@@ -147,10 +158,15 @@ export function useMapNodes({
     // Create the actual node objects using calculated positions
     const positionedNodes: Node[] = [];
     items.forEach((item) => {
+      // Get custom dimensions for this node or use defaults
+      const customDimension = nodeDimensions[item.id];
+      const itemWidth = customDimension?.width || defaultNodeWidth;
+      const itemHeight = customDimension?.height || defaultNodeHeight;
+
       // Ensure every item has a position, even if not in the hierarchy
       const position = nodePositions[item.id] || {
-        x: Math.random() * (items.length * (nodeWidth + horizontalDistance)),
-        y: Math.random() * (5 * (nodeHeight + verticalDistance)),
+        x: Math.random() * (items.length * (itemWidth + horizontalDistance)),
+        y: Math.random() * (5 * (itemHeight + verticalDistance)),
       };
 
       positionedNodes.push({
@@ -162,8 +178,8 @@ export function useMapNodes({
           ipAddress: item.ipAddress,
           type: item.type,
           icon: getIconForType(item.type),
-          width: nodeWidth,
-          height: nodeHeight,
+          width: itemWidth,
+          height: itemHeight,
         },
       });
     });
@@ -173,9 +189,10 @@ export function useMapNodes({
     items,
     horizontalDistance,
     verticalDistance,
-    nodeWidth,
-    nodeHeight,
+    defaultNodeWidth,
+    defaultNodeHeight,
     isVertical,
+    nodeDimensions,
   ]);
 
   // Create edges from item links

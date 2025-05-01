@@ -157,12 +157,8 @@ const CustomControls: FC<CustomControlsProps> = ({
 interface CustomizationPanelProps {
   horizontalDistance: number;
   verticalDistance: number;
-  nodeWidth: number;
-  nodeHeight: number;
   onHorizontalDistanceChange: (value: number[]) => void;
   onVerticalDistanceChange: (value: number[]) => void;
-  onNodeWidthChange: (value: number[]) => void;
-  onNodeHeightChange: (value: number[]) => void;
   showIcon: boolean;
   showLabel: boolean;
   showIpAddress: boolean;
@@ -178,12 +174,8 @@ interface CustomizationPanelProps {
 const CustomizationPanel: FC<CustomizationPanelProps> = ({
   horizontalDistance,
   verticalDistance,
-  nodeWidth,
-  nodeHeight,
   onHorizontalDistanceChange,
   onVerticalDistanceChange,
-  onNodeWidthChange,
-  onNodeHeightChange,
   showIcon,
   showLabel,
   showIpAddress,
@@ -255,42 +247,6 @@ const CustomizationPanel: FC<CustomizationPanelProps> = ({
         />
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="node-width" className="text-sm">
-            Node Width
-          </Label>
-          <span className="text-muted-foreground text-xs">{nodeWidth}px</span>
-        </div>
-        <Slider
-          id="node-width"
-          min={130}
-          max={300}
-          step={10}
-          value={[nodeWidth]}
-          onValueChange={onNodeWidthChange}
-          className="w-48"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="node-height" className="text-sm">
-            Node Height
-          </Label>
-          <span className="text-muted-foreground text-xs">{nodeHeight}px</span>
-        </div>
-        <Slider
-          id="node-height"
-          min={120}
-          max={300}
-          step={10}
-          value={[nodeHeight]}
-          onValueChange={onNodeHeightChange}
-          className="w-48"
-        />
-      </div>
-
       <div className="mt-2 pt-2">
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
@@ -349,8 +305,8 @@ const Flow: FC = () => {
     useState(false);
   const [horizontalDistance, setHorizontalDistance] = useState(40);
   const [verticalDistance, setVerticalDistance] = useState(80);
-  const [nodeWidth, setNodeWidth] = useState(130);
-  const [nodeHeight, setNodeHeight] = useState(120);
+  const [defaultNodeWidth] = useState(130);
+  const [defaultNodeHeight] = useState(120);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(true);
@@ -368,15 +324,33 @@ const Flow: FC = () => {
     setVerticalDistance(value[0]);
   };
 
-  const handleNodeWidthChange = (value: number[]) => {
-    setNodeWidth(value[0]);
+  // State to track dynamically measured node dimensions
+  const [nodeDimensions, setNodeDimensions] = useState<
+    Record<string, { width: number; height: number }>
+  >({});
+
+  // Handle node measurement callback
+  const handleNodeMeasure = useCallback(
+    (nodeId: string, dimensions: { width: number; height: number }) => {
+      setNodeDimensions((prev) => {
+        // Only update if dimensions have changed
+        if (
+          prev[nodeId]?.width === dimensions.width &&
+          prev[nodeId]?.height === dimensions.height
+        ) {
+          return prev;
+        }
+        return { ...prev, [nodeId]: dimensions };
+      });
+    },
+    [],
+  );
+
+  // Toggle customization panel
+  const toggleCustomizationPanel = () => {
+    setIsCustomizationPanelOpen(!isCustomizationPanelOpen);
   };
 
-  const handleNodeHeightChange = (value: number[]) => {
-    setNodeHeight(value[0]);
-  };
-
-  // Toggle layout direction
   const toggleDirection = () => {
     setIsVertical(!isVertical);
     // Add a slight delay before fitting view to allow the layout to update
@@ -405,9 +379,10 @@ const Flow: FC = () => {
     items,
     horizontalDistance: isVertical ? horizontalDistance : verticalDistance,
     verticalDistance: isVertical ? verticalDistance : horizontalDistance,
-    nodeWidth,
-    nodeHeight,
+    defaultNodeWidth: defaultNodeWidth,
+    defaultNodeHeight: defaultNodeHeight,
     isVertical,
+    nodeDimensions,
   });
 
   // Add onClick handler to nodes
@@ -418,11 +393,12 @@ const Flow: FC = () => {
         ...node.data,
         id: node.id,
         onNodeClick: handleNodeClick,
-        isVertical: isVertical,
+        onNodeMeasure: handleNodeMeasure,
         showIcon,
         showLabel,
         showIpAddress,
         showBackground,
+        isVertical,
       },
     }));
   }, [nodes, showIcon, showLabel, showIpAddress, showBackground, isVertical]);
@@ -553,22 +529,17 @@ const Flow: FC = () => {
           onZoomIn={() => zoomIn()}
           onZoomOut={() => zoomOut()}
           onFitView={() => fitView()}
-          onCustomize={() =>
-            setIsCustomizationPanelOpen(!isCustomizationPanelOpen)
-          }
+          onCustomize={toggleCustomizationPanel}
           onToggleDirection={toggleDirection}
           onExportImage={exportImage}
           isVertical={isVertical}
         />
+
         <CustomizationPanel
           horizontalDistance={horizontalDistance}
           verticalDistance={verticalDistance}
-          nodeWidth={nodeWidth}
-          nodeHeight={nodeHeight}
           onHorizontalDistanceChange={handleHorizontalDistanceChange}
           onVerticalDistanceChange={handleVerticalDistanceChange}
-          onNodeWidthChange={handleNodeWidthChange}
-          onNodeHeightChange={handleNodeHeightChange}
           showIcon={showIcon}
           showLabel={showLabel}
           showIpAddress={showIpAddress}
@@ -593,6 +564,7 @@ const Flow: FC = () => {
   );
 };
 
+// Wrapper component that provides the ReactFlow context
 export function MapView() {
   return (
     <div className="flex h-full flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:gap-2 lg:px-6">
