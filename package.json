@@ -36,7 +36,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "d3-flextree": "^2.1.2",
     "dagre": "^0.8.5",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.9.2",
@@ -56,7 +55,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",
-    "@types/d3-flextree": "^2.1.4",
     "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.3",
