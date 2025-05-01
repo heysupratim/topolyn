@@ -1,6 +1,7 @@
 import { FC, useRef, useEffect } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
 import { Badge } from "@/components/ui/badge";
+import { Service } from "@/context/InventoryContext";
 
 // Custom node component to display inventory item details
 const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
@@ -11,6 +12,8 @@ const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
     data.showIpAddress !== undefined ? data.showIpAddress : true;
   const showBackground =
     data.showBackground !== undefined ? data.showBackground : true;
+  const showServices =
+    data.showServices !== undefined ? data.showServices : true;
 
   // Create a ref to measure the actual rendered size of the node
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -28,7 +31,14 @@ const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
         });
       }
     }
-  }, [id, data.onNodeMeasure, showIcon, showLabel, showIpAddress]);
+  }, [
+    id,
+    data.onNodeMeasure,
+    showIcon,
+    showLabel,
+    showIpAddress,
+    showServices,
+  ]);
 
   return (
     <div
@@ -53,6 +63,26 @@ const InventoryItemNode: FC<NodeProps> = ({ data, id }) => {
           <Badge variant="secondary" className="text-xs">
             {data.ipAddress}
           </Badge>
+        )}
+
+        {/* Display services if available and enabled */}
+        {showServices && data.services && data.services.length > 0 && (
+          <div className="border-border mt-2 w-full border-t pt-2">
+            <div className="flex flex-col gap-1">
+              {data.services.map((service: Service, index: number) => (
+                <div key={index} className="flex items-center gap-2">
+                  {service.imageUrl ? (
+                    <img
+                      src={service.imageUrl}
+                      alt={service.name}
+                      className="h-4 w-4 rounded-sm object-contain"
+                    />
+                  ) : null}
+                  <span className="truncate text-xs">{service.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
       <Handle

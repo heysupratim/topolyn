@@ -177,6 +177,9 @@ export function useMapNodes({
           icon: getIconForType(item.type),
           width: itemWidth,
           height: itemHeight,
+          services: item.services || [],
+          isVertical: isVertical,
+          id: item.id,
         },
       });
     });
