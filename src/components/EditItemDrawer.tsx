@@ -59,6 +59,7 @@ interface EditItemDrawerProps {
 interface LinkState {
   targetItemId: string;
   linkType: string;
+  port?: string; // Optional port field for the link
   linkId?: string; // Existing link ID, if available
 }
 
@@ -114,6 +115,7 @@ export function EditItemDrawer({
       const links = item.outgoingLinks.map((link) => ({
         targetItemId: link.targetItemId,
         linkType: link.linkType,
+        port: link.port,
         linkId: link.id,
       }));
       setItemLinks(links);
@@ -177,14 +179,15 @@ export function EditItemDrawer({
           ),
       );
 
-      // Find links to update (existing items with changed link type)
+      // Find links to update (existing items with changed link type or port)
       const linksToUpdate = itemLinks.filter((link) => {
         const matchingInitialLink = initialItemLinks.find(
           (initLink) => initLink.targetItemId === link.targetItemId,
         );
         return (
           matchingInitialLink &&
-          matchingInitialLink.linkType !== link.linkType &&
+          (matchingInitialLink.linkType !== link.linkType ||
+            matchingInitialLink.port !== link.port) &&
           matchingInitialLink.linkId
         );
       });
@@ -200,7 +203,12 @@ export function EditItemDrawer({
       // Add new links
       for (const link of linksToAdd) {
         if (link.targetItemId) {
-          await addItemLink(formData.id, link.targetItemId, link.linkType);
+          await addItemLink(
+            formData.id,
+            link.targetItemId,
+            link.linkType,
+            link.port,
+          );
         }
       }
 
@@ -214,6 +222,7 @@ export function EditItemDrawer({
             formData.id,
             matchingInitialLink.linkId,
             link.linkType,
+            link.port,
           );
         }
       }
@@ -599,6 +608,23 @@ export function EditItemDrawer({
                             >
                               <X className="h-4 w-4" />
                             </Button>
+                          </div>
+
+                          {/* Add port input field */}
+                          <div className="mt-2 ml-0">
+                            <Input
+                              placeholder="Port (optional)"
+                              value={link.port || ""}
+                              onChange={(e) => {
+                                const newItemLinks = [...itemLinks];
+                                newItemLinks[index] = {
+                                  ...newItemLinks[index],
+                                  port: e.target.value,
+                                };
+                                setItemLinks(newItemLinks);
+                              }}
+                              className="h-8 text-sm"
+                            />
                           </div>
                         </div>
                       ))}

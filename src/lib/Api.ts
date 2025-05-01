@@ -63,18 +63,30 @@ export const inventoryApi = {
   },
 
   // Add a link between two inventory items
-  addItemLink: async (id: string, linkedItemId: string, linkType: string) => {
+  addItemLink: async (
+    id: string,
+    linkedItemId: string,
+    linkType: string,
+    port?: string,
+  ) => {
     const response = await apiClient.post(`/inventory/${id}/links`, {
       linkedItemId,
       linkType,
+      port,
     });
     return response.data;
   },
 
   // Update a link between two inventory items
-  updateItemLink: async (id: string, linkId: string, linkType: string) => {
+  updateItemLink: async (
+    id: string,
+    linkId: string,
+    linkType: string,
+    port?: string,
+  ) => {
     const response = await apiClient.put(`/inventory/${id}/links/${linkId}`, {
       linkType,
+      port,
     });
     return response.data;
   },

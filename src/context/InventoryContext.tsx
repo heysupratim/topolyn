@@ -23,6 +23,7 @@ export type InventoryItem = {
 export type ItemLink = {
   id: string;
   linkType: string;
+  port?: string;
   sourceItemId: string;
   targetItemId: string;
   sourceItem?: InventoryItem;
@@ -43,11 +44,13 @@ interface InventoryContextType {
     id: string,
     linkedItemId: string,
     linkType: string,
+    port?: string,
   ) => Promise<void>;
   updateItemLink: (
     id: string,
     linkId: string,
     linkType: string,
+    port?: string,
   ) => Promise<void>;
   removeItemLink: (id: string, linkId: string) => Promise<void>;
 }
@@ -151,11 +154,12 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     id: string,
     linkedItemId: string,
     linkType: string,
+    port?: string,
   ) => {
     try {
       setIsLoading(true);
       setError(null);
-      await inventoryApi.addItemLink(id, linkedItemId, linkType);
+      await inventoryApi.addItemLink(id, linkedItemId, linkType, port);
       // Refresh the inventory after adding the link
       await refreshInventory();
     } catch (err) {
@@ -174,11 +178,12 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     id: string,
     linkId: string,
     linkType: string,
+    port?: string,
   ) => {
     try {
       setIsLoading(true);
       setError(null);
-      await inventoryApi.updateItemLink(id, linkId, linkType);
+      await inventoryApi.updateItemLink(id, linkId, linkType, port);
       // Refresh the inventory after updating the link
       await refreshInventory();
     } catch (err) {
