@@ -32,14 +32,14 @@ export function InventoryTable() {
   const [hideIpField, setHideIpField] = useState(false);
 
   // Filter items by name and type
-  const filteredItems = items.filter((item) => {
+  const filteredItems = Array.isArray(items) ? items.filter((item) => {
     const matchesName = item.name
       .toLowerCase()
       .includes(nameFilter.toLowerCase());
     const matchesType =
       typeFilters.length === 0 || typeFilters.includes(item.type);
     return matchesName && matchesType;
-  });
+  }) : [];
 
   // Toggle type filter
   const toggleTypeFilter = (value: string) => {
@@ -83,7 +83,7 @@ export function InventoryTable() {
 
   return (
     <div className="h-full space-y-4">
-      {items.length > 0 && (
+      {Array.isArray(items) && items.length > 0 && (
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <Input
             placeholder="Search by name..."
